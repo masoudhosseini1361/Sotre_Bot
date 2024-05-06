@@ -21,10 +21,25 @@ create_sale_row_table()
 API_TOKEN =bottoken
 
 user_step=dict()     #user_step={ cid :step ,....}
-user_profile=dict()     #user_data={cid : [firstname,lastname, mobile , code melli ,adress],....}
+user_profile=dict()     #user_data={cid : [fullname, mobile phone, national code ,username ,adress],....}
 admin=[878897420]     #admin=[cid admin]
-block_user=[]        #block user = [cid block admin,...]
-
+block_user=[]        #block user = [cid block ,...]
+user_cid=[]            #user_cid =[cid,cid,....] 
+result = get_info_user()
+for i in result:
+    if i['is_block']=='YES' :
+        block_user.append(i['cid'])
+        user_profile.update({i['cid']:[i['fullname'],i['mobile_phone'],i['national_code'],i['username'],i['adress']]})
+        user_step.setdefault(i['cid'],1000)
+    elif i['privilege'] =='USER' :
+        user_cid.append(i['cid'])
+        user_profile.update({i['cid']:[i['fullname'],i['mobile_phone'],i['national_code'],i['username'],i['adress']]})
+        user_step.setdefault(i['cid'],3000)
+    else :
+        admin.append(i['cid'])
+        user_profile.update({i['cid']:[i['fullname'],i['mobile_phone'],i['national_code'],i['username'],i['adress']]})
+        user_step.setdefault(i['cid'],2000)
+            
 button= {
         'my_acount' : 'حساب کاربری من',
         'help' :'راهنمای استفاده از بات',
@@ -83,8 +98,11 @@ def command_start(message):
         user_s=get_user_step(cid)
         if user_s ==1000 :
             if cid in block_user : return
+            if cid in user_cid : return
             username = message.chat.username
-            insert_user(cid=cid ,username=username,step=user_s)
+            insert_user(cid=cid ,username=username)
+            user_cid.append(cid)
+            user_profile.update({cid:[None,None,None,username,None]})          
             markup=ReplyKeyboardMarkup(resize_keyboard=True)
             markup.add(button['my_acount'],button['buy'])
             markup.add(button['contact_to_me'],button['help'])
