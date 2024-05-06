@@ -18,11 +18,7 @@ create_table_kala()
 create_sale_invoice_table()
 create_sale_row_table()
 
-<<<<<<< HEAD
 API_TOKEN =bottoken
-=======
-API_TOKEN = ' '
->>>>>>> 57a58806c4d6bf25757dcda6d3958b87c1678d0d
 
 user_step=dict()     #user_step={ cid :step ,....}
 user_profile=dict()     #user_data={cid : [firstname,lastname, mobile , code melli ,adress],....}
