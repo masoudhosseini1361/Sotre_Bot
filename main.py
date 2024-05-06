@@ -6,7 +6,7 @@ from telebot.types import ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboa
 from DDL import *
 from DQL import *
 from DML import *
-
+from BOTTOKEN import *
 
 
 
@@ -18,7 +18,7 @@ create_table_kala()
 create_sale_invoice_table()
 create_sale_row_table()
 
-API_TOKEN = '7021587562:AAE5KZnW-v2xbkpN0-0cUQTB8F1f4_aOuJk'
+API_TOKEN =bottoken
 
 user_step=dict()     #user_step={ cid :step ,....}
 user_profile=dict()     #user_data={cid : [firstname,lastname, mobile , code melli ,adress],....}
