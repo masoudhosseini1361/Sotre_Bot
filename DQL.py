@@ -20,5 +20,10 @@ def get_info_user() :
 
 
 if __name__ == "__main__" :    
-    pass
-    
+   pass
+"""  print(get_info_user())
+    result =get_info_user()
+    for i in result :
+        print(i)
+        print(i['cid'])
+        """
