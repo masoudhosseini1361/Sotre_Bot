@@ -34,7 +34,7 @@ for i in result:
     elif i['privilege'] =='USER' :
         user_cid.append(i['cid'])
         user_profile.update({i['cid']:[i['fullname'],i['mobile_phone'],i['national_code'],i['username'],i['adress']]})
-        user_step.setdefault(i['cid'],3000)
+        user_step.setdefault(i['cid'],1000)
     else :
         admin.append(i['cid'])
         user_profile.update({i['cid']:[i['fullname'],i['mobile_phone'],i['national_code'],i['username'],i['adress']]})

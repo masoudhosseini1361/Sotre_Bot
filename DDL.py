@@ -20,8 +20,8 @@ def create_table_user():
         mobile_phone    VARCHAR(15),
         adress          VARCHAR(200),
         privilege       ENUM('USER','ADMIN') DEFAULT 'USER',
-        is_bolck        ENUM('NO','YES') DEFAULT 'NO',
-        user_date       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,      
+        is_block        ENUM('NO','YES') DEFAULT 'NO',
+        user_date       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP     
     )                   
     """
     cursor.execute(SQL_QURY)
