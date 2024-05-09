@@ -21,8 +21,7 @@ def create_table_user():
         adress          VARCHAR(200),
         privilege       ENUM('USER','ADMIN') DEFAULT 'USER',
         is_bolck        ENUM('NO','YES') DEFAULT 'NO',
-        user_date       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        step            INT NOT NULL            
+        user_date       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,      
     )                   
     """
     cursor.execute(SQL_QURY)
