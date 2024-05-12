@@ -1,15 +1,15 @@
 import mysql.connector
-
+from Config import *
 
 def create_database():
-    conn=mysql.connector.connect(user='root',password='mh0075239000',host='localhost')
+    conn=mysql.connector.connect(user=db_username,password=db_password,host=db_host)
     cursor=conn.cursor()
-    cursor.execute("CREATE DATABASE IF NOT EXISTS store")
+    cursor.execute(f"CREATE DATABASE IF NOT EXISTS {db_name}")
     cursor.close()
     conn.close()
 
 def create_table_user():
-    conn=mysql.connector.connect(user='root',password='mh0075239000',host='localhost',database='store')
+    conn=mysql.connector.connect(**db_config)
     cursor=conn.cursor()
     SQL_QURY="""CREATE TABLE IF NOT EXISTS user(
         id              INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
@@ -29,7 +29,7 @@ def create_table_user():
     conn.close()
 
 def create_table_category():
-    conn=mysql.connector.connect(user='root',password='mh0075239000',host='localhost',database='store')
+    conn=mysql.connector.connect(**db_config)
     cursor=conn.cursor()
     SQL_QURY="""CREATE TABLE IF NOT EXISTS category(
         name_english   VARCHAR(15) PRIMARY KEY NOT NULL ,
@@ -44,7 +44,7 @@ def create_table_category():
 
 
 def create_table_kala():
-    conn=mysql.connector.connect(user='root',password='mh0075239000',host='localhost',database='store')
+    conn=mysql.connector.connect(**db_config)
     cursor=conn.cursor()
     SQL_QURY="""CREATE TABLE IF NOT EXISTS kala(
         id             INT AUTO_INCREMENT NOT NULL,
@@ -69,7 +69,7 @@ def create_table_kala():
     
     
 def create_sale_invoice_table():
-    conn=mysql.connector.connect(user='root',password='mh0075239000',host='localhost',database='store')
+    conn=mysql.connector.connect(**db_config)
     cursor=conn.cursor()
     SQL_QURY="""CREATE TABLE IF NOT EXISTS sale_invoice(
         i_number            INT AUTO_INCREMENT NOT NULL ,
@@ -84,7 +84,7 @@ def create_sale_invoice_table():
     conn.close()
     
 def create_sale_row_table():
-    conn=mysql.connector.connect(user='root',password='mh0075239000',host='localhost',database='store')
+    conn=mysql.connector.connect(**db_config)
     cursor=conn.cursor()
     SQL_QURY="""CREATE TABLE IF NOT EXISTS sale_row(
         i_number            INT ,

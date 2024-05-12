@@ -6,11 +6,11 @@ from telebot.types import ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboa
 from DDL import *
 from DQL import *
 from DML import *
-from BOTTOKEN import *
+from Config import *
 
 
 
-logging.basicConfig(filename='project.log', filemode='a', level=logging.INFO, format= f'%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(filename=logfile, filemode='a', level=logging.INFO, format= f'%(asctime)s - %(levelname)s - %(message)s')
 create_database()
 create_table_user() 
 create_table_category()
@@ -22,7 +22,7 @@ API_TOKEN =bottoken
 
 user_step=dict()     #user_step={ cid :step ,....}
 user_profile=dict()     #user_data={cid : [fullname, mobile phone, national code ,username ,adress],....}
-admin=[878897420]     #admin=[cid admin]
+admin=[87889742]     #admin=[cid admin]
 block_user=[]        #block user = [cid block ,...]
 user_cid=[]            #user_cid =[cid,cid,....] 
 result = get_info_user()
@@ -69,7 +69,7 @@ def get_user_step(cid):
     return user_step.setdefault(cid, 1000)
 
 
-bot = telebot.TeleBot(API_TOKEN, num_threads=10)
+bot = telebot.TeleBot(API_TOKEN, num_threads=therad_num)
 
 
 

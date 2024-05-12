@@ -4,4 +4,4 @@ my_venv/
 *.log
 requirment.txt
 text.txt
-BOTTOKEN.py
+Config.py

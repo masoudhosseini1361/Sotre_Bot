@@ -1,9 +1,9 @@
 import mysql.connector
-
+from Config import *
 
 
 def get_info_user() :
-    conn=mysql.connector.connect(user='root',password='mh0075239000',host='localhost',database='store')
+    conn=mysql.connector.connect(**db_config)
     cursor=conn.cursor(dictionary=True)
     SQL_QURY="""SELECT * FROM user"""
     cursor.execute(SQL_QURY)

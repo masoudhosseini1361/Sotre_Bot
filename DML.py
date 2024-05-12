@@ -1,8 +1,9 @@
 import mysql.connector
+from Config import *
 
 
 def insert_user(cid , fullname= None , mobile_phone = None , national_code=None , adress= None ,username=None):
-    conn=mysql.connector.connect(user='root',password='mh0075239000',host='localhost',database='store')
+    conn=mysql.connector.connect(**db_config)
     cursor=conn.cursor()
     SQL_QURY="""INSERT IGNORE INTO user(cid , fullname, username , national_code, mobile_phone  , adress )
                 VALUE(%s,%s,%s,%s,%s,%s)
