@@ -26,7 +26,12 @@ user_step=dict()     #user_step={ cid :step ,....}
 user_profile=dict()     #user_data={cid : [fullname, mobile phone, national code ,username ,adress],....}
 admin=[87889742]     #admin=[cid admin]
 block_user=[]        #block user = [cid block ,...]
-user_cid=[]            #user_cid =[cid,cid,....] 
+user_cid=[]            #user_cid =[cid,cid,....]
+
+full_name_temp=dict()        #full_name={cid :fulname,....}
+national_code_temp= dict()   #national_code{cid :national_code ,....}
+mobile_phone_temp =dict()    #mobile_phone {cid :mobile_phone,....}
+adress_temp =dict()          #adress{cid:adress}
 result = get_info_user()
 for i in result:
     if i['is_block']=='YES' :
@@ -43,22 +48,23 @@ for i in result:
         user_step.setdefault(i['cid'],2000)
             
 button= {
-        'my_acount' : 'حساب کاربری من',
-        'help' :'راهنمای استفاده از بات',
-        'buy'  :'خرید',
-        'contact_to_me' : 'تماس با ما' ,
-        'back' :'بازگشت',
-        'shirt' : 'پیراهن',
-        'tshirt' :'تی شرت',
-        'pants' : 'شلوار',
-        'home' : 'منوی اصلی',
-        'cart_basket' : 'سبد خرید' ,
-        'user_profile' :'مشخصات کاربری',
-        'first_name':'نام' ,
-        'last_name' :'نام خانوادگی' ,
-        'mobile' : ' شماره موبایل' ,
-        'personal_id' : 'کد ملی' ,
-        'adress' : 'آدرس',
+        'my_acount' :            'حساب کاربری من',
+        'help' :                 'راهنمای استفاده از بات',
+        'buy'  :                 'خرید',
+        'contact_to_me' :        'تماس با ما' ,
+        'back' :                 'بازگشت',
+        'register' :             'ثبت',
+        'shirt' :                'پیراهن',
+        'tshirt' :               'تی شرت',
+        'pants' :                'شلوار',
+        'home' :                 'منوی اصلی',
+        'cart_basket' :          'سبد خرید' ,
+        'user_profile' :         'مشخصات کاربری',
+        'full_name':             'نام و نام خانوادگی' ,
+        'mobile' :               'شماره موبایل' ,
+        'personal_id'  :         'کد ملی' ,
+        'adress' :               'آدرس',
+        'send number':          'ارسال شماره موبایل'
         }
 
 command= {  
@@ -187,13 +193,56 @@ def user_Profile_func(message):
     cid=message.chat.id
     if cid in block_user :return
     markup=ReplyKeyboardMarkup(resize_keyboard=True)
-    markup.add(button['last_name'],button['first_name'])
-    markup.add(button['mobile'],button['personal_id'])
-    markup.add(button['back'],button['adress'])
+    markup.add(button['personal_id'],button['full_name'])
+    markup.add(button['adress'],button['mobile'])
+    markup.add(button['back'],button['register'])
     markup.add(button['home'])
     user_step[cid]=1250
     bot.send_message(cid,text['add_personal'],reply_markup=markup)    
   
+ 
+@bot.message_handler(func=lambda message : message.text==button['full_name'])
+def full_name_func(message):
+    cid=message.chat.id
+    if cid in block_user :return
+    user_step[cid]=1251
+    bot.send_message(cid,text['message_name'])    
+
+@bot.message_handler(func=lambda message : message.text==button['personal_id'])
+def personal_id_func(message):
+    cid=message.chat.id
+    if cid in block_user :return
+    user_step[cid]=1252
+    bot.send_message(cid,text['message_national_code'])      
+
+
+@bot.message_handler(func=lambda message : message.text==button['mobile'])
+def mobile_phone_func(message):
+    cid=message.chat.id
+    if cid in block_user :return
+    markup=ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.add(KeyboardButton(button['send number'], request_contact=True))
+    user_step[cid]= 1253
+    bot.send_message(cid, text['share_phone'], reply_markup=markup)
+    
+    
+       
+@bot.message_handler(content_types= ['contact'])
+def contact_handler(message):
+    cid=message.chat.id
+    if cid in block_user :return
+    check=
+    if user_step[cid] == 1253 :
+        phone_number = message.contact.phone_number
+        user_id = message.contact.user_id
+        if cid == user_id :
+            mobile_phone_temp.update({cid:phone_number})
+            user_step[cid]=1250
+        else :
+            user_step[cid]=1250 
+            bot.send_message(cid,text['mobile_error'])   
+    
+        
 
 @bot.message_handler(func=lambda message : message.text==button['contact_to_me'])
 def contact_to_me_func(message):
@@ -204,7 +253,27 @@ def contact_to_me_func(message):
 
 
 
-
+@bot.message_handler(func=lambda message :True)
+def message_func(message):
+    cid=message.chat.id
+    if cid in block_user :return
+    if user_step[cid]==1251 :
+        full_name =message.text
+        full_name_temp.update({cid:full_name})
+        user_step[cid]=1250
+    elif user_step[cid] == 1252 :
+        national_code= message.text
+        if national_code.isnumeric() == True :
+            if  len(national_code) ==10 :
+               national_code_temp.update({cid:national_code})
+               user_step[cid]=1250
+               bot.send_message(cid,text['ok'])
+            else :
+                bot.send_message(cid,text['national_Error2'])
+        else :
+            bot.send_message(cid,text['national_Error1'])
+    elif user_step[cid] ==1254 :
+                pass
 
 
 bot.infinity_polling()
