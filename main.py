@@ -76,8 +76,13 @@ command= {
 def get_user_step(cid):
     return user_step.setdefault(cid, 1000)
 
+def creat_marrkup(step) :
+    pass
+
+
 
 bot = telebot.TeleBot(API_TOKEN, num_threads=therad_num)
+
 
 
 
@@ -225,23 +230,79 @@ def mobile_phone_func(message):
     user_step[cid]= 1253
     bot.send_message(cid, text['share_phone'], reply_markup=markup)
     
-    
+@bot.message_handler(func=lambda message : message.text==button['adress'])
+def adress_func(message):
+    cid=message.chat.id
+    if cid in block_user :return
+    user_step[cid]=1254
+    bot.send_message(cid,text['adress_message'])      
+     
        
 @bot.message_handler(content_types= ['contact'])
 def contact_handler(message):
     cid=message.chat.id
     if cid in block_user :return
-    check=
     if user_step[cid] == 1253 :
         phone_number = message.contact.phone_number
         user_id = message.contact.user_id
         if cid == user_id :
             mobile_phone_temp.update({cid:phone_number})
+            markup=ReplyKeyboardMarkup(resize_keyboard=True)
+            markup.add(button['personal_id'],button['full_name'])
+            markup.add(button['adress'],button['mobile'])
+            markup.add(button['back'],button['register'])
+            markup.add(button['home'])
             user_step[cid]=1250
+            bot.send_message(cid,text['ok'],reply_markup=markup)    
         else :
-            user_step[cid]=1250 
-            bot.send_message(cid,text['mobile_error'])   
+            user_step[cid]=1250
+            markup=ReplyKeyboardMarkup(resize_keyboard=True)
+            markup.add(KeyboardButton(button['send number'], request_contact=True))
+            user_step[cid]= 1253
+            bot.send_message(cid,text['mobile_error'], reply_markup=markup)   
     
+
+@bot.message_handler(func=lambda message : message.text==button['register'])
+def register_account_func(message):
+    cid=message.chat.id
+    if cid in block_user :return
+    if cid in full_name_temp :
+        if cid in national_code_temp :
+            if cid in mobile_phone_temp :
+                if cid in adress_temp :
+                     #user_data={cid : [fullname, mobile phone, national code ,username ,adress],....}
+                    user=user_profile.get(cid)
+                    user[0]=full_name_temp.get(cid)
+                    user[1]=mobile_phone_temp.get(cid)
+                    user[2]=national_code_temp.get(cid)
+                    user[4]=adress_temp.get(cid)
+                    user_profile.update({cid:user})
+                    update_user(cid =cid , fullname=user[0] , mobile_phone=user[1] , national_code=user[2] , adress=user[4] )
+                    full_name_temp.pop(cid)
+                    mobile_phone_temp.pop(cid)
+                    national_code_temp.pop(cid)
+                    adress_temp.pop(cid)
+                    bot.send_message(cid,text['sabt'])
+                    markup=ReplyKeyboardMarkup(resize_keyboard=True)
+                    markup.add(button['user_profile'],button['cart_basket'])
+                    markup.add(button['home'])
+                    user_step[cid]=1200
+                    bot.send_message(cid,text['select_switch'],reply_markup=markup)
+                else :
+                    user_step[cid]=1254
+                    bot.send_message(cid,text['adress_message'])      
+            else :
+                markup=ReplyKeyboardMarkup(resize_keyboard=True)
+                markup.add(KeyboardButton(button['send number'], request_contact=True))
+                user_step[cid]= 1253
+                bot.send_message(cid, text['share_phone'], reply_markup=markup)                
+        else :
+            user_step[cid]=1252
+            bot.send_message(cid,text['message_national_code'])              
+    else :
+        user_step[cid]=1251
+        bot.send_message(cid,text['message_name'])              
+
         
 
 @bot.message_handler(func=lambda message : message.text==button['contact_to_me'])
@@ -260,20 +321,39 @@ def message_func(message):
     if user_step[cid]==1251 :
         full_name =message.text
         full_name_temp.update({cid:full_name})
+        markup=ReplyKeyboardMarkup(resize_keyboard=True)
+        markup.add(button['personal_id'],button['full_name'])
+        markup.add(button['adress'],button['mobile'])
+        markup.add(button['back'],button['register'])
+        markup.add(button['home'])
         user_step[cid]=1250
+        bot.send_message(cid,text['ok'],reply_markup=markup) 
     elif user_step[cid] == 1252 :
         national_code= message.text
         if national_code.isnumeric() == True :
             if  len(national_code) ==10 :
-               national_code_temp.update({cid:national_code})
-               user_step[cid]=1250
-               bot.send_message(cid,text['ok'])
+                national_code_temp.update({cid:national_code})
+                markup=ReplyKeyboardMarkup(resize_keyboard=True)
+                markup.add(button['personal_id'],button['full_name'])
+                markup.add(button['adress'],button['mobile'])
+                markup.add(button['back'],button['register'])
+                markup.add(button['home'])
+                user_step[cid]=1250
+                bot.send_message(cid,text['ok'],reply_markup=markup)    
             else :
                 bot.send_message(cid,text['national_Error2'])
         else :
             bot.send_message(cid,text['national_Error1'])
     elif user_step[cid] ==1254 :
-                pass
-
+        adress_text=message.text
+        adress_temp.update({cid:adress_text})
+        markup=ReplyKeyboardMarkup(resize_keyboard=True)
+        markup.add(button['personal_id'],button['full_name'])
+        markup.add(button['adress'],button['mobile'])
+        markup.add(button['back'],button['register'])
+        markup.add(button['home'])
+        user_step[cid]=1250
+        bot.send_message(cid,text['ok'],reply_markup=markup)    
+        
 
 bot.infinity_polling()
