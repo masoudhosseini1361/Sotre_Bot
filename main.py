@@ -24,15 +24,16 @@ API_TOKEN =bottoken
 
 user_step=dict()     #user_step={ cid :step ,....}
 user_profile=dict()     #user_data={cid : [fullname, mobile phone, national code ,username ,adress],....}
-admin=[87889742]     #admin=[cid admin]
+admin=[]     #admin=[cid admin]
 block_user=[]        #block user = [cid block ,...]
 user_cid=[]            #user_cid =[cid,cid,....]
-
+user_step.update({manager[0]:3000})
 full_name_temp=dict()        #full_name={cid :fulname,....}
 national_code_temp= dict()   #national_code{cid :national_code ,....}
 mobile_phone_temp =dict()    #mobile_phone {cid :mobile_phone,....}
 adress_temp =dict()          #adress{cid:adress}
 result = get_info_user()
+
 for i in result:
     if i['is_block']=='YES' :
         block_user.append(i['cid'])
@@ -64,7 +65,12 @@ button= {
         'mobile' :               'شماره موبایل' ,
         'personal_id'  :         'کد ملی' ,
         'adress' :               'آدرس',
-        'send number':          'ارسال شماره موبایل'
+        'send number':          'ارسال شماره موبایل',
+        'kala' :                'کالا',
+        'invoice' :             'فاکتور',
+        'admin' :               'ادمین',
+        'finacial_department' : 'امور مالی',
+        'reports' :             'گزارشات'
         }
 
 command= {  
@@ -106,6 +112,15 @@ def command_start(message):
     if cid in block_user : return
     if cid in admin :
         user_step.setdefault(cid,2000)
+    if cid in manager :
+        user_s=get_user_step(cid)
+        if user_s ==3000 :
+            if cid in block_user : return
+            markup=ReplyKeyboardMarkup(resize_keyboard=True)
+            markup.add(button['kala'],button['invoice'],button['admin'])
+            markup.add(button['finacial_department'],button['reports'])
+            bot.send_message(cid,text['select_menu'],reply_markup=markup)
+          
     else:
         bot.send_message(cid,text['welcome'],reply_to_message_id=message.id)
         user_s=get_user_step(cid)
