@@ -70,7 +70,9 @@ button= {
         'invoice' :             'فاکتور',
         'admin' :               'ادمین',
         'finacial_department' : 'امور مالی',
-        'reports' :             'گزارشات'
+        'reports' :             'گزارشات',
+        'new_kala' :            'تعریف کالا',
+        'change_kala' :         'اصلاح کالا'
         }
 
 command= {  
@@ -117,8 +119,9 @@ def command_start(message):
         if user_s ==3000 :
             if cid in block_user : return
             markup=ReplyKeyboardMarkup(resize_keyboard=True)
-            markup.add(button['kala'],button['invoice'],button['admin'])
-            markup.add(button['finacial_department'],button['reports'])
+            markup.add(button['admin'],button['invoice'],button['kala'])
+            markup.add(button['reports'],button['finacial_department'])
+
             bot.send_message(cid,text['select_menu'],reply_markup=markup)
           
     else:
@@ -184,6 +187,22 @@ def help_func(message) :
     if user_step[cid] <2000 :
         bot.send_message(cid,text['help'])
 
+@bot.message_handler(func=lambda message : message.text==button['kala'])
+def help_func(message) :
+    cid=message.chat.id
+    if cid in block_user : return
+    if user_step[cid] >=2000 :
+        if user_step[cid] == 2000 :
+            user_step[cid] = 2100
+        else :
+            user_step[cid] = 3100    
+        markup=ReplyKeyboardMarkup(resize_keyboard=True)
+        markup.add(button['change_kala'],button['new_kala'])
+        markup.add(button['home'])
+
+        bot.send_message(cid,text['select_menu'],reply_markup=markup)
+        
+
     
 @bot.message_handler(func=lambda message : message.text==button['home'])
 def home_func(message):
@@ -195,6 +214,21 @@ def home_func(message):
         markup.add(button['my_acount'],button['buy'])
         markup.add(button['contact_to_me'],button['help'])
         bot.send_message(cid,text['select_menu'],reply_markup=markup)
+    elif user_step[cid] >2000 and user_step[cid] <3000 :
+            user_step[cid]=2000
+            markup=ReplyKeyboardMarkup(resize_keyboard=True)
+            markup.add(button['invoice'],button['kala'])
+            markup.add(button['reports'],button['finacial_department'])
+
+            bot.send_message(cid,text['select_menu'],reply_markup=markup)
+    elif user_step[cid] >3000 :
+            user_step[cid]=3000
+            markup=ReplyKeyboardMarkup(resize_keyboard=True)
+            markup.add(button['admin'],button['invoice'],button['kala'])
+            markup.add(button['reports'],button['finacial_department'])
+
+            bot.send_message(cid,text['select_menu'],reply_markup=markup)
+        
         
        
 @bot.message_handler(func=lambda message : message.text==button['my_acount'])
