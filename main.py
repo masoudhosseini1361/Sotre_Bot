@@ -72,7 +72,9 @@ button= {
         'finacial_department' : 'امور مالی',
         'reports' :             'گزارشات',
         'new_kala' :            'تعریف کالا',
-        'change_kala' :         'اصلاح کالا'
+        'change_kala' :         'اصلاح کالا',
+        'new_group':            'تعریف گروه' ,       
+        'change_group' :        'اصلاح گروه'
         }
 
 command= {  
@@ -188,7 +190,7 @@ def help_func(message) :
         bot.send_message(cid,text['help'])
 
 @bot.message_handler(func=lambda message : message.text==button['kala'])
-def help_func(message) :
+def kala_func(message) :
     cid=message.chat.id
     if cid in block_user : return
     if user_step[cid] >=2000 :
@@ -197,12 +199,22 @@ def help_func(message) :
         else :
             user_step[cid] = 3100    
         markup=ReplyKeyboardMarkup(resize_keyboard=True)
-        markup.add(button['change_kala'],button['new_kala'])
+        markup.add(button['new_kala'],button['new_group'])
+        markup.add(button['change_kala'],button['change_group'])
         markup.add(button['home'])
 
         bot.send_message(cid,text['select_menu'],reply_markup=markup)
-        
 
+@bot.message_handler(func=lambda message : message.text==button['new_group'])
+def newgroup_func(message) :
+    cid=message.chat.id        
+    if cid in block_user : return
+    if user_step[cid] ==2100 or user_step[cid]==3100 :
+        if user_step[cid] == 2100 :
+            user_step[cid] = 2110
+        else :
+            user_step[cid] = 3110
+            
     
 @bot.message_handler(func=lambda message : message.text==button['home'])
 def home_func(message):
