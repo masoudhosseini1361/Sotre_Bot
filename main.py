@@ -24,6 +24,7 @@ API_TOKEN =bottoken
 
 user_step=dict()     #user_step={ cid :step ,....}
 user_profile=dict()     #user_data={cid : [fullname, mobile phone, national code ,username ,adress],....}
+category=dict()         #category={name_english :[name_persian,show_categroy=YES OR NO],...}
 admin=[]     #admin=[cid admin]
 block_user=[]        #block user = [cid block ,...]
 user_cid=[]            #user_cid =[cid,cid,....]
@@ -33,7 +34,6 @@ national_code_temp= dict()   #national_code{cid :national_code ,....}
 mobile_phone_temp =dict()    #mobile_phone {cid :mobile_phone,....}
 adress_temp =dict()          #adress{cid:adress}
 result = get_info_user()
-
 for i in result:
     if i['is_block']=='YES' :
         block_user.append(i['cid'])
@@ -47,7 +47,10 @@ for i in result:
         admin.append(i['cid'])
         user_profile.update({i['cid']:[i['fullname'],i['mobile_phone'],i['national_code'],i['username'],i['adress']]})
         user_step.setdefault(i['cid'],2000)
-            
+result =get_info_category()
+if len(result) !=0 :
+    for i in result :
+        category.update({i['name_english']:[i['name_persian'],i['show_category']]})
 button= {
         'my_acount' :            'حساب کاربری من',
         'help' :                 'راهنمای استفاده از بات',
@@ -74,7 +77,8 @@ button= {
         'new_kala' :            'تعریف کالا',
         'change_kala' :         'اصلاح کالا',
         'new_group':            'تعریف گروه' ,       
-        'change_group' :        'اصلاح گروه'
+        'change_group' :        'اصلاح گروه',
+        'add_group' :           'اضافه به گروه'
         }
 
 command= {  
@@ -97,7 +101,8 @@ bot = telebot.TeleBot(API_TOKEN, num_threads=therad_num)
 
 
 
-# only used for console output 
+# only used for console output
+# this is then listener function
 def listener(messages):
     """
     When new messages arrive TeleBot will call this function.
@@ -107,6 +112,42 @@ def listener(messages):
             # print the sent message to the console
             logging.info(str(m.chat.first_name) + " [" + str(m.chat.id) + "]: " + m.text)
 bot.set_update_listener(listener)  # register listener
+
+
+#function
+
+def inline_add_group(cid , mid):
+
+    pass
+
+
+
+
+
+# Inline QURY HANDLER
+
+@bot.callback_query_handler(func=lambda call: True)
+def call_back_handler(call):
+    print(call.message.date , time.time())
+    cid = call.message.chat.id
+    data = call.data
+    mid = call.message.message_id
+    call_id = call.id
+    print(f'cid: {cid}, data: {data}, mid: {mid}, id: {call_id}')
+    # if call.message.date > time.time() + 10:
+    #     bot.edit_message_reply_markup(cid, mid, reply_markup=None)
+    if data.startswith('newgroup'):
+        data=data.split('_')[-1]
+        if data =='add' :
+            inline_add_group(cid ,mid)
+
+
+
+
+
+
+
+
 
 #Commands
 
@@ -214,8 +255,18 @@ def newgroup_func(message) :
             user_step[cid] = 2110
         else :
             user_step[cid] = 3110
-            
-    
+        markup=InlineKeyboardMarkup() 
+        for i in category.keys():
+            # temp=category[i][0]
+            # print(temp)
+            markup.add(InlineKeyboardButton(f'{category[i][0]}',callback_data=f'newgroup_{i}'))
+        inline_button=button['add_group']
+        markup.add(InlineKeyboardButton(f'{inline_button}   ➕',callback_data='newgroup_add'))  
+        bot.send_message(cid,text['add_group'],reply_markup=markup)  
+
+
+
+
 @bot.message_handler(func=lambda message : message.text==button['home'])
 def home_func(message):
     cid=message.chat.id
