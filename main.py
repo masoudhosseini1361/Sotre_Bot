@@ -24,7 +24,7 @@ API_TOKEN =bottoken
 
 user_step=dict()     #user_step={ cid :step ,....}
 user_profile=dict()     #user_data={cid : [fullname, mobile phone, national code ,username ,adress],....}
-category=dict()         #category={name_english :[name_persian,show_categroy=YES OR NO],...}
+category=dict()         #category={name_category :show_categroy=YES OR NO,...}
 admin=[]     #admin=[cid admin]
 block_user=[]        #block user = [cid block ,...]
 user_cid=[]            #user_cid =[cid,cid,....]
@@ -33,6 +33,7 @@ full_name_temp=dict()        #full_name={cid :fulname,....}
 national_code_temp= dict()   #national_code{cid :national_code ,....}
 mobile_phone_temp =dict()    #mobile_phone {cid :mobile_phone,....}
 adress_temp =dict()          #adress{cid:adress}
+category_temp=dict()          #category_temp{cid :[name_category,mid]}
 result = get_info_user()
 for i in result:
     if i['is_block']=='YES' :
@@ -50,7 +51,7 @@ for i in result:
 result =get_info_category()
 if len(result) !=0 :
     for i in result :
-        category.update({i['name_english']:[i['name_persian'],i['show_category']]})
+        category.update({i['name_category']:i['show_category']})
 button= {
         'my_acount' :            'حساب کاربری من',
         'help' :                 'راهنمای استفاده از بات',
@@ -58,6 +59,7 @@ button= {
         'contact_to_me' :        'تماس با ما' ,
         'back' :                 'بازگشت',
         'register' :             'ثبت',
+        'cancel':                'کنسل',
         'shirt' :                'پیراهن',
         'tshirt' :               'تی شرت',
         'pants' :                'شلوار',
@@ -78,7 +80,8 @@ button= {
         'change_kala' :         'اصلاح کالا',
         'new_group':            'تعریف گروه' ,       
         'change_group' :        'اصلاح گروه',
-        'add_group' :           'اضافه به گروه'
+        'add_group' :           'اضافه به گروه',
+        'category_name':         'نام گروه',
         }
 
 command= {  
@@ -117,8 +120,18 @@ bot.set_update_listener(listener)  # register listener
 #function
 
 def inline_add_group(cid , mid):
+    if user_step[cid] ==2100 or user_step[cid] ==3100:
+        if user_step[cid] == 2100 :
+            user_step[cid] = 2110
+        else :
+            user_step[cid] = 3110 
+    markup=InlineKeyboardMarkup()
+    markup.add(InlineKeyboardButton(category_temp[cid][0],callback_data='group_add/namecategory'))
+    markup.add(InlineKeyboardButton(button['register'],callback_data='group_add/sabt'))
+    markup.add(InlineKeyboardButton(button['cancel'],callback_data='group_add/cancel'))
+    bot.edit_message_text(text['add_name_group'],cid,mid,reply_markup=markup)
+    return
 
-    pass
 
 
 
@@ -128,7 +141,6 @@ def inline_add_group(cid , mid):
 
 @bot.callback_query_handler(func=lambda call: True)
 def call_back_handler(call):
-    print(call.message.date , time.time())
     cid = call.message.chat.id
     data = call.data
     mid = call.message.message_id
@@ -136,11 +148,51 @@ def call_back_handler(call):
     print(f'cid: {cid}, data: {data}, mid: {mid}, id: {call_id}')
     # if call.message.date > time.time() + 10:
     #     bot.edit_message_reply_markup(cid, mid, reply_markup=None)
-    if data.startswith('newgroup'):
+    if call.message.date < (time.time()-86400) :
+        bot.edit_message_reply_markup(cid, mid, reply_markup=None)
+    elif data.startswith('group'):
         data=data.split('_')[-1]
-        if data =='add' :
-            inline_add_group(cid ,mid)
-
+        if user_step[cid] ==3110 or user_step[cid] ==2110  :
+            print (data)
+            if data.startswith('add'): 
+                data= data.split('/')[-1]               
+                if data =='add' :
+                    category_temp.setdefault(cid,[button['category_name'],mid]) 
+                    inline_add_group(cid ,mid)
+                elif data =='namecategory' :             
+                        bot.send_message(cid,text['name_group'])
+                elif data == 'sabt' :
+                    if category_temp[cid][0]==button['category_name'] :
+                        bot.send_message(cid,text['sabt_error'])
+                    else:
+                        if user_step[cid] ==2110 :
+                            user_step[cid] =2100
+                        else :
+                            user_step[cid]=3100   
+                        name_category =category_temp[cid][0]
+                        insert_category(name_category=name_category,show_category='YES')
+                        bot.answer_callback_query(call_id, text['sabt'])
+                        bot.edit_message_reply_markup(cid, mid, reply_markup=None)
+                        category.update({name_category:"YES"})
+                        category_temp.pop(cid)
+                elif data == 'cancel' :
+                    if cid in category_temp.keys() :
+                        category_temp.pop(cid)
+                    bot.edit_message_reply_markup(cid, mid, reply_markup=None)
+            elif data.startswith('edit'):
+                
+                pass
+            
+            
+            
+            else :
+                bot.answer_callback_query(call_id, text['no_data'])  
+                bot.edit_message_reply_markup(cid, mid, reply_markup=None)    
+        else :
+            bot.edit_message_reply_markup(cid, mid, reply_markup=None)        
+    else :
+        bot.answer_callback_query(call_id, text['no_data'])  
+        bot.edit_message_reply_markup(cid, mid, reply_markup=None)      
 
 
 
@@ -247,7 +299,7 @@ def kala_func(message) :
         bot.send_message(cid,text['select_menu'],reply_markup=markup)
 
 @bot.message_handler(func=lambda message : message.text==button['new_group'])
-def newgroup_func(message) :
+def group_func(message) :
     cid=message.chat.id        
     if cid in block_user : return
     if user_step[cid] ==2100 or user_step[cid]==3100 :
@@ -257,11 +309,10 @@ def newgroup_func(message) :
             user_step[cid] = 3110
         markup=InlineKeyboardMarkup() 
         for i in category.keys():
-            # temp=category[i][0]
-            # print(temp)
-            markup.add(InlineKeyboardButton(f'{category[i][0]}',callback_data=f'newgroup_{i}'))
+             markup.add(InlineKeyboardButton(f'{i}',callback_data=f'group_edit/{i}'))
         inline_button=button['add_group']
-        markup.add(InlineKeyboardButton(f'{inline_button}   ➕',callback_data='newgroup_add'))  
+        markup.add(InlineKeyboardButton(f'{inline_button}   ➕',callback_data='group_add/add'))
+        markup.add(InlineKeyboardButton(button['cancel'],callback_data='group_add/cancel'))  
         bot.send_message(cid,text['add_group'],reply_markup=markup)  
 
 
@@ -466,6 +517,14 @@ def message_func(message):
         markup.add(button['home'])
         user_step[cid]=1250
         bot.send_message(cid,text['ok'],reply_markup=markup)    
-        
-
+    elif user_step[cid] ==3110 or user_step[cid] ==2110 :
+        name_category=message.text
+        mid=category_temp[cid][1]
+        category_temp.update({cid:[name_category,mid]})
+        inline_add_group(cid , mid)
+    
+    
+    
+    
+    
 bot.infinity_polling()
