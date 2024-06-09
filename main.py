@@ -81,7 +81,9 @@ button= {
         'new_group':            'تعریف گروه' ,       
         'change_group' :        'اصلاح گروه',
         'add_group' :           'اضافه به گروه',
-        'category_name':         'نام گروه',
+        'category_name':        'نام گروه',
+        'edit':                 'اصلاح',
+        'delete':               'حذف',
         }
 
 command= {  
@@ -133,6 +135,19 @@ def inline_add_group(cid , mid):
     return
 
 
+def inline_edit_group(cid , mid, oldname):
+    if user_step[cid] ==2100 or user_step[cid] ==3100:
+        if user_step[cid] == 2100 :
+            user_step[cid] = 2110
+        else :
+            user_step[cid] = 3110 
+    markup=InlineKeyboardMarkup()
+    markup.add(InlineKeyboardButton(oldname,callback_data='group_edit/namecategory'))
+    markup.add(InlineKeyboardButton(button['edit'],callback_data=f'group_edit/edit-{oldname}'))
+    markup.add(InlineKeyboardButton(button['delete'],callback_data=f'group_edit/delete-{oldname}'))
+    bot.edit_message_text(text['edit_name_group'],cid,mid,reply_markup=markup)
+    return
+
 
 
 
@@ -153,14 +168,13 @@ def call_back_handler(call):
     elif data.startswith('group'):
         data=data.split('_')[-1]
         if user_step[cid] ==3110 or user_step[cid] ==2110  :
-            print (data)
             if data.startswith('add'): 
                 data= data.split('/')[-1]               
                 if data =='add' :
                     category_temp.setdefault(cid,[button['category_name'],mid]) 
                     inline_add_group(cid ,mid)
                 elif data =='namecategory' :             
-                        bot.send_message(cid,text['name_group'])
+                    bot.send_message(cid,text['name_group'])
                 elif data == 'sabt' :
                     if category_temp[cid][0]==button['category_name'] :
                         bot.send_message(cid,text['sabt_error'])
@@ -179,12 +193,18 @@ def call_back_handler(call):
                     if cid in category_temp.keys() :
                         category_temp.pop(cid)
                     bot.edit_message_reply_markup(cid, mid, reply_markup=None)
-            elif data.startswith('edit'):
-                
-                pass
-            
-            
-            
+            elif data.startswith('edit'):              
+                data= data.split('/')[-1]
+                print(data)
+                if data in category.keys():
+                    print(data)
+                    inline_edit_group(cid , mid, data)
+                elif data.split('-')[0] =='edit' :
+                    data= data.split('-')[0]
+                    print (data)   
+                elif data.split('-')[0] =='delete' :
+                    data= data.split('-')[0]
+                    print (data)                       
             else :
                 bot.answer_callback_query(call_id, text['no_data'])  
                 bot.edit_message_reply_markup(cid, mid, reply_markup=None)    
