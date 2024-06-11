@@ -44,8 +44,29 @@ def insert_category(name_category ,show_category ):
     conn.close()
 
 
+def update_category(new_name_category ,old_name_category ):
+    conn=mysql.connector.connect(**db_config)
+    cursor=conn.cursor()
+    SQL_QURY="""UPDATE category SET name_category=%s WHERE name_category=%s"""
+    cursor.execute(SQL_QURY,(new_name_category ,old_name_category))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+def delete_category(name_category):
+    conn=mysql.connector.connect(**db_config)
+    cursor=conn.cursor()
+    SQL_QURY="""DELETE FROM category  WHERE name_category=%s"""
+    cursor.execute(SQL_QURY,(name_category , ))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+
 if __name__ == "__main__":
-    pass
+    #pass
    #insert_user(cid=342165313,step=1000 ,username='masoud216')
    #update_user(cid=87889742,fullname='masoud hosseini',national_code='0075239000',mobile_phone = '09125227989',adress='prozi street')
    #insert_category(name_category='شلوار',show_category='YES')
+   update_category(new_name_category='شلور' ,old_name_category='تی شرت' )
+   #delete_category(name_category='شلوار')

@@ -30,10 +30,11 @@ block_user=[]        #block user = [cid block ,...]
 user_cid=[]            #user_cid =[cid,cid,....]
 user_step.update({manager[0]:3000})
 full_name_temp=dict()        #full_name={cid :fulname,....}
-national_code_temp= dict()   #national_code{cid :national_code ,....}
-mobile_phone_temp =dict()    #mobile_phone {cid :mobile_phone,....}
-adress_temp =dict()          #adress{cid:adress}
-category_temp=dict()          #category_temp{cid :[name_category,mid]}
+national_code_temp= dict()   #national_code={cid :national_code ,....}
+mobile_phone_temp =dict()    #mobile_phone={cid :mobile_phone,....}
+adress_temp =dict()          #adress={cid:adress}
+category_temp=dict()          #category_temp={cid :[name_category,mid]}
+category_oldname=dict()        #category_oldname={cid:oldnamecategory,....}
 result = get_info_user()
 for i in result:
     if i['is_block']=='YES' :
@@ -76,10 +77,8 @@ button= {
         'admin' :               'ادمین',
         'finacial_department' : 'امور مالی',
         'reports' :             'گزارشات',
-        'new_kala' :            'تعریف کالا',
-        'change_kala' :         'اصلاح کالا',
-        'new_group':            'تعریف گروه' ,       
-        'change_group' :        'اصلاح گروه',
+        'kala' :                'کالا',
+        'group':                'گروه' ,       
         'add_group' :           'اضافه به گروه',
         'category_name':        'نام گروه',
         'edit':                 'اصلاح',
@@ -135,20 +134,31 @@ def inline_add_group(cid , mid):
     return
 
 
-def inline_edit_group(cid , mid, oldname):
+def inline_edit_group(cid , mid):
     if user_step[cid] ==2100 or user_step[cid] ==3100:
         if user_step[cid] == 2100 :
             user_step[cid] = 2110
         else :
             user_step[cid] = 3110 
     markup=InlineKeyboardMarkup()
-    markup.add(InlineKeyboardButton(oldname,callback_data='group_edit/namecategory'))
-    markup.add(InlineKeyboardButton(button['edit'],callback_data=f'group_edit/edit-{oldname}'))
-    markup.add(InlineKeyboardButton(button['delete'],callback_data=f'group_edit/delete-{oldname}'))
+    markup.add(InlineKeyboardButton(category_oldname[cid],callback_data='group_edit/namecategory'))
+    markup.add(InlineKeyboardButton(button['edit'],callback_data=f'group_edit/edit-{category_oldname[cid]}'))
+    markup.add(InlineKeyboardButton(button['delete'],callback_data=f'group_edit/delete-{category_oldname[cid]}'))
     bot.edit_message_text(text['edit_name_group'],cid,mid,reply_markup=markup)
     return
 
-
+def inline_change_group(cid , mid):
+    if user_step[cid] ==2100 or user_step[cid] ==3100:
+        if user_step[cid] == 2100 :
+            user_step[cid] = 2110
+        else :
+            user_step[cid] = 3110 
+    markup=InlineKeyboardMarkup()
+    markup.add(InlineKeyboardButton(category_temp[cid][0],callback_data='group_edit/change-newname'))
+    markup.add(InlineKeyboardButton(button['register'],callback_data='group_edit/sabt-newname'))
+    markup.add(InlineKeyboardButton(button['cancel'],callback_data='group_edit/cancel-newname'))
+    bot.edit_message_text(text['change_name_group'],cid,mid,reply_markup=markup)
+    return
 
 
 
@@ -192,19 +202,68 @@ def call_back_handler(call):
                 elif data == 'cancel' :
                     if cid in category_temp.keys() :
                         category_temp.pop(cid)
+                    if user_step[cid] ==2110  :
+                        user_step[cid] =2100
+                    elif user_step[cid]==3110 :
+                        user_step[cid]=3100   
                     bot.edit_message_reply_markup(cid, mid, reply_markup=None)
             elif data.startswith('edit'):              
                 data= data.split('/')[-1]
-                print(data)
+                print(data,'in')
                 if data in category.keys():
-                    print(data)
-                    inline_edit_group(cid , mid, data)
+                    category_temp.update({cid:[data,mid]})
+                    category_oldname.update({cid:data})
+                    print(data,'2')
+                    inline_edit_group(cid , mid)
                 elif data.split('-')[0] =='edit' :
                     data= data.split('-')[0]
-                    print (data)   
+                    inline_change_group(cid , mid)   
                 elif data.split('-')[0] =='delete' :
+                    if user_step[cid] ==2110 :
+                        user_step[cid] =2100
+                    else :
+                        user_step[cid]=3100                    
                     data= data.split('-')[0]
-                    print (data)                       
+                    print (category_oldname[cid])
+                    delete_category(name_category=category_oldname[cid])
+                    category.pop(category_oldname[cid])
+                    category_temp.pop(cid)
+                    category_oldname.pop(cid)
+                    bot.edit_message_reply_markup(cid, mid, reply_markup=None)
+                elif data.split('-')[0] =='change' :
+                    if user_step[cid] ==2110 :
+                        user_step[cid] =2111
+                    else :
+                        user_step[cid]=3111                    
+                    bot.send_message(cid,text['new_name_group'])
+                elif data.split('-')[0] =='sabt' :
+                    if category_temp[cid][0] in category.keys() :
+                        bot.send_message(cid,text['sabt_error'])
+                    else:
+                        if user_step[cid] ==2110 :
+                            user_step[cid] =2100
+                        else :
+                            user_step[cid]=3100   
+                        new_name_category =category_temp[cid][0]
+                        old_name_category=category_oldname[cid]
+                        show_category=category[old_name_category]
+                        update_category(new_name_category=new_name_category ,old_name_category=old_name_category)
+                        bot.answer_callback_query(call_id, text['sabt'])
+                        bot.edit_message_reply_markup(cid, mid, reply_markup=None)
+                        category.pop(old_name_category)
+                        category.update({new_name_category:show_category})
+                        category_temp.pop(cid)
+                        category_oldname.pop(cid)
+                        
+                elif data.split('-')[0] =='cancel' :
+                    if cid in category_temp.keys() :
+                        category_temp.pop(cid)
+                        category_oldname.pop(cid)
+                    if user_step[cid] ==2110 :
+                        user_step[cid] =2100
+                    else :
+                        user_step[cid]=3100   
+                    bot.edit_message_reply_markup(cid, mid, reply_markup=None)              
             else :
                 bot.answer_callback_query(call_id, text['no_data'])  
                 bot.edit_message_reply_markup(cid, mid, reply_markup=None)    
@@ -263,6 +322,7 @@ def main_command(message) :
         markup.add(button['my_acount'],button['buy'])
         markup.add(button['contact_to_me'],button['help'])
         bot.send_message(cid,text['select_menu'],reply_markup=markup)
+        
 
 @bot.message_handler(commands=['help'])
 def help_func(message) :
@@ -312,15 +372,14 @@ def kala_func(message) :
         else :
             user_step[cid] = 3100    
         markup=ReplyKeyboardMarkup(resize_keyboard=True)
-        markup.add(button['new_kala'],button['new_group'])
-        markup.add(button['change_kala'],button['change_group'])
+        markup.add(button['kala'],button['group'])
         markup.add(button['home'])
 
         bot.send_message(cid,text['select_menu'],reply_markup=markup)
 
-@bot.message_handler(func=lambda message : message.text==button['new_group'])
+@bot.message_handler(func=lambda message : message.text==button['group'])
 def group_func(message) :
-    cid=message.chat.id        
+    cid=message.chat.id       
     if cid in block_user : return
     if user_step[cid] ==2100 or user_step[cid]==3100 :
         if user_step[cid] == 2100 :
@@ -542,6 +601,15 @@ def message_func(message):
         mid=category_temp[cid][1]
         category_temp.update({cid:[name_category,mid]})
         inline_add_group(cid , mid)
+    elif user_step[cid] ==3111 or user_step[cid] ==2111 :
+        if user_step[cid]==2111:
+            user_step[cid]=2110
+        else:
+            user_step[cid]=3110    
+        name_category=message.text
+        mid=category_temp[cid][1]
+        category_temp.update({cid:[name_category,mid]})
+        inline_change_group(cid , mid)
     
     
     
