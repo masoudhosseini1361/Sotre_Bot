@@ -35,6 +35,7 @@ mobile_phone_temp =dict()    #mobile_phone={cid :mobile_phone,....}
 adress_temp =dict()          #adress={cid:adress}
 category_temp=dict()          #category_temp={cid :[name_category,mid]}
 category_oldname=dict()        #category_oldname={cid:oldnamecategory,....}
+kala=dict()                     #kala{id:[kalaname,buy_price,sale_price,name_category,kala_date,image_file_id,count,M,L,XL,XXL],.....}
 result = get_info_user()
 for i in result:
     if i['is_block']=='YES' :
@@ -53,6 +54,13 @@ result =get_info_category()
 if len(result) !=0 :
     for i in result :
         category.update({i['name_category']:i['show_category']})
+        
+result =get_info_kala()
+if len(result) !=0 :
+    for i in result :
+        kala.update({i['id']:[i['kalaname'],i['buy_price'],i['sale_price'],i['name_category'],i['kala_date'],i['image_file_id'],i['count'],i['M'],i['L'],i['XL'],i['XXL']]})
+
+
 button= {
         'my_acount' :            'حساب کاربری من',
         'help' :                 'راهنمای استفاده از بات',
@@ -79,10 +87,11 @@ button= {
         'reports' :             'گزارشات',
         'kala' :                'کالا',
         'group':                'گروه' ,       
-        'add_group' :           'اضافه به گروه',
+        'add_group' :           'تعریف گروه جدید',
         'category_name':        'نام گروه',
         'edit':                 'اصلاح',
         'delete':               'حذف',
+
         }
 
 command= {  
@@ -94,7 +103,7 @@ command= {
 def get_user_step(cid):
     return user_step.setdefault(cid, 1000)
 
-def creat_marrkup(step) :
+def creat_marrkup_button(step) :
     pass
 
 
@@ -118,7 +127,20 @@ def listener(messages):
 bot.set_update_listener(listener)  # register listener
 
 
-#function
+#function 
+
+
+def make_inlinekeyboardMarkup_category(cid=None ,mid=None):
+        markup=InlineKeyboardMarkup() 
+        for i in category.keys():
+             markup.add(InlineKeyboardButton(f'{i}',callback_data=f'group_edit/{i}'))
+        inline_button=button['add_group']
+        markup.add(InlineKeyboardButton(f'{inline_button}   ➕',callback_data='group_add/add'))
+        markup.add(InlineKeyboardButton(button['cancel'],callback_data='group_add/cancel'))  
+        if mid == None :
+            bot.send_message(cid,text['add_group'],reply_markup=markup)  
+        else: 
+            bot.edit_message_text(text['add_group'],cid,mid,reply_markup=markup)
 
 def inline_add_group(cid , mid):
     if user_step[cid] ==2100 or user_step[cid] ==3100:
@@ -144,6 +166,7 @@ def inline_edit_group(cid , mid):
     markup.add(InlineKeyboardButton(category_oldname[cid],callback_data='group_edit/namecategory'))
     markup.add(InlineKeyboardButton(button['edit'],callback_data=f'group_edit/edit-{category_oldname[cid]}'))
     markup.add(InlineKeyboardButton(button['delete'],callback_data=f'group_edit/delete-{category_oldname[cid]}'))
+    markup.add(InlineKeyboardButton(button['back'],callback_data=f'group_edit/back-{category_oldname[cid]}'))
     bot.edit_message_text(text['edit_name_group'],cid,mid,reply_markup=markup)
     return
 
@@ -162,6 +185,37 @@ def inline_change_group(cid , mid):
 
 
 
+# make ReplyKeyboardMarkup
+
+def make_ReplyKeyboardMarkup(user_s=None):
+    markup=ReplyKeyboardMarkup(resize_keyboard=True)
+    if user_s >=3000 :
+        if user_s  == 3000 :
+            markup.add(button['admin'],button['invoice'],button['kala'])
+            markup.add(button['reports'],button['finacial_department'])
+            return(markup)
+        elif user_s ==3100 :
+            markup.add(button['kala'],button['group'])
+            markup.add(button['home'])
+            return(markup)
+        
+    elif user_s >=2000  and user_s < 3000 :
+        if user_s == 2000 :
+            markup.add(button['invoice'],button['kala'])
+            markup.add(button['reports'],button['finacial_department'])
+            return(markup)
+        elif user_s ==2100 :
+            markup.add(button['kala'],button['group'])
+            markup.add(button['home'])
+            return(markup)
+        
+    elif user_s >= 1000 and user_s <1000 :
+        pass
+    
+    
+    
+    
+        
 # Inline QURY HANDLER
 
 @bot.callback_query_handler(func=lambda call: True)
@@ -209,11 +263,11 @@ def call_back_handler(call):
                     bot.edit_message_reply_markup(cid, mid, reply_markup=None)
             elif data.startswith('edit'):              
                 data= data.split('/')[-1]
-                print(data,'in')
+               # print(data,'in')
                 if data in category.keys():
                     category_temp.update({cid:[data,mid]})
                     category_oldname.update({cid:data})
-                    print(data,'2')
+                    # print(data,'2')
                     inline_edit_group(cid , mid)
                 elif data.split('-')[0] =='edit' :
                     data= data.split('-')[0]
@@ -224,7 +278,7 @@ def call_back_handler(call):
                     else :
                         user_step[cid]=3100                    
                     data= data.split('-')[0]
-                    print (category_oldname[cid])
+                    # print (category_oldname[cid])
                     delete_category(name_category=category_oldname[cid])
                     category.pop(category_oldname[cid])
                     category_temp.pop(cid)
@@ -264,6 +318,8 @@ def call_back_handler(call):
                     else :
                         user_step[cid]=3100   
                     bot.edit_message_reply_markup(cid, mid, reply_markup=None)              
+                elif data.split('-')[0]=='back':
+                   make_inlinekeyboardMarkup_category(cid=cid ,mid=mid)   
             else :
                 bot.answer_callback_query(call_id, text['no_data'])  
                 bot.edit_message_reply_markup(cid, mid, reply_markup=None)    
@@ -292,11 +348,7 @@ def command_start(message):
         user_s=get_user_step(cid)
         if user_s ==3000 :
             if cid in block_user : return
-            markup=ReplyKeyboardMarkup(resize_keyboard=True)
-            markup.add(button['admin'],button['invoice'],button['kala'])
-            markup.add(button['reports'],button['finacial_department'])
-
-            bot.send_message(cid,text['select_menu'],reply_markup=markup)
+            bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_s=user_step[cid]))
           
     else:
         bot.send_message(cid,text['welcome'],reply_to_message_id=message.id)
@@ -322,6 +374,10 @@ def main_command(message) :
         markup.add(button['my_acount'],button['buy'])
         markup.add(button['contact_to_me'],button['help'])
         bot.send_message(cid,text['select_menu'],reply_markup=markup)
+    elif user_step[cid] >= 2000 and user_step[cid] <3000 :
+            pass
+    elif user_step[cid] >= 3000 :
+        bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_s=user_step[cid]))
         
 
 @bot.message_handler(commands=['help'])
@@ -331,7 +387,7 @@ def help_func(message) :
     if user_step[cid] <2000 :
         bot.send_message(cid,text['help'])
 
-#text
+#ReplyKeyboardMarkup
 
 @bot.message_handler(func=lambda message : message.text==button['buy'])
 def button_buy(message) :
@@ -343,6 +399,8 @@ def button_buy(message) :
     markup.add(button['home'],button['pants'])
     user_step[cid]=1100
     bot.send_message(cid,text['select_breakdown'],reply_markup=markup)
+
+
 
 @bot.message_handler(func=lambda message : message.text==button['back'])
 def back_func(message) :
@@ -369,13 +427,15 @@ def kala_func(message) :
     if user_step[cid] >=2000 :
         if user_step[cid] == 2000 :
             user_step[cid] = 2100
-        else :
-            user_step[cid] = 3100    
-        markup=ReplyKeyboardMarkup(resize_keyboard=True)
-        markup.add(button['kala'],button['group'])
-        markup.add(button['home'])
-
-        bot.send_message(cid,text['select_menu'],reply_markup=markup)
+            bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_s=user_step[cid]))
+        elif user_step[cid] == 2100 :
+            user_step[cid] =2120
+        elif user_step[cid] == 3000:
+            user_step[cid] = 3100
+            bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_s=user_step[cid]))
+        elif user_step[cid] == 3100 :
+            user_step[cid] = 3120        
+        bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_s=user_step[cid]))
 
 @bot.message_handler(func=lambda message : message.text==button['group'])
 def group_func(message) :
@@ -386,15 +446,14 @@ def group_func(message) :
             user_step[cid] = 2110
         else :
             user_step[cid] = 3110
-        markup=InlineKeyboardMarkup() 
-        for i in category.keys():
-             markup.add(InlineKeyboardButton(f'{i}',callback_data=f'group_edit/{i}'))
-        inline_button=button['add_group']
-        markup.add(InlineKeyboardButton(f'{inline_button}   ➕',callback_data='group_add/add'))
-        markup.add(InlineKeyboardButton(button['cancel'],callback_data='group_add/cancel'))  
-        bot.send_message(cid,text['add_group'],reply_markup=markup)  
-
-
+        make_inlinekeyboardMarkup_category(cid=cid)   
+    else :
+        if 2110 <user_step[cid] < 2200 :
+            user_step[cid] ==2100
+        elif 3110 <user_step[cid] <3200 :
+            user_step[cid] =3100 
+        bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_s=user_step[cid]))
+    
 
 
 @bot.message_handler(func=lambda message : message.text==button['home'])

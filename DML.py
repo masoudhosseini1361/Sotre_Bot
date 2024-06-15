@@ -62,11 +62,38 @@ def delete_category(name_category):
     cursor.close()
     conn.close()
 
+#    id             INT AUTO_INCREMENT NOT NULL,
+#         kalaname       VARCHAR(50),
+#         buy_price      DOUBLE,
+#         sale_price     INT,
+#         name_category  VARCHAR(15),
+#         kala_date      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+#         image_file_id   VARCHAR(200),
+#         count          SMALLINT (255) DEFAULT 0,
+#         M              SMALLINT (255) DEFAULT 0,
+#         L              SMALLINT (255) DEFAULT 0,
+#         XL             SMALLINT (255) DEFAULT 0,
+#         XXL            SMALLINT (255) DEFAULT 0,
+# All Function  For Kala  Table
+def insert_kala( kalaname,name_category ,kala_date,image_file_id, buy_price = 0 , sale_price=0 , count=0,m_size=0,l_size=0,xl_size=0,xxl_size=0):
+    conn=mysql.connector.connect(**db_config)
+    cursor=conn.cursor()
+    SQL_QURY="""INSERT IGNORE INTO kala(kalaname, buy_price , sale_price , name_category , kala_date , image_file_id , count ,M ,L ,XL ,XXL )
+                VALUE(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+    """
+    cursor.execute(SQL_QURY,(kalaname, buy_price , sale_price ,name_category ,kala_date,image_file_id,count,m_size,l_size,xl_size,xxl_size))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+
+
 
 if __name__ == "__main__":
-    #pass
+    # pass
    #insert_user(cid=342165313,step=1000 ,username='masoud216')
    #update_user(cid=87889742,fullname='masoud hosseini',national_code='0075239000',mobile_phone = '09125227989',adress='prozi street')
    #insert_category(name_category='شلوار',show_category='YES')
-   update_category(new_name_category='شلور' ,old_name_category='تی شرت' )
+  # update_category(new_name_category='شلور' ,old_name_category='تی شرت' )
    #delete_category(name_category='شلوار')
+   insert_kala( kalaname='polo',name_category='تی شرت' ,kala_date='1403/03/27',image_file_id='d:\python\project\image.jpg', buy_price = 0 , sale_price=None , count=0,m_size=0,l_size=0,xl_size=0,xxl_size=0)
