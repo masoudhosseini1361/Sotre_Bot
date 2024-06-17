@@ -1,6 +1,8 @@
 import mysql.connector
 from Config import *
 
+#All Function for user table
+
 
 def get_info_user() :
     conn=mysql.connector.connect(**db_config)
@@ -12,6 +14,9 @@ def get_info_user() :
     conn.close()
     return result
 
+#All Function for category table
+
+
 def get_info_category() :
     conn=mysql.connector.connect(**db_config)
     cursor=conn.cursor(dictionary=True)
@@ -21,6 +26,8 @@ def get_info_category() :
     cursor.close()
     conn.close()
     return result
+
+#All Function for kala table
 
 def get_info_kala() :
     conn=mysql.connector.connect(**db_config)

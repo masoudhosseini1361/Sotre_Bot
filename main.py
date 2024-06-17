@@ -2,6 +2,7 @@
 import telebot
 import logging
 import time
+from jdatetime import date ,timedelta
 from telebot.types import ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton, KeyboardButton
 from DDL import *
 from DQL import *
@@ -62,36 +63,36 @@ if len(result) !=0 :
 
 
 button= {
-        'my_acount' :            'حساب کاربری من',
+        'my_acount' :            'حساب کاربری من  👤',
         'help' :                 'راهنمای استفاده از بات',
         'buy'  :                 'خرید',
-        'contact_to_me' :        'تماس با ما' ,
+        'contact_to_me' :        'تماس با ما  📞' ,
         'back' :                 'بازگشت',
-        'register' :             'ثبت',
+        'register' :             'ثبت  ✅',
         'cancel':                'کنسل',
         'shirt' :                'پیراهن',
         'tshirt' :               'تی شرت',
         'pants' :                'شلوار',
-        'home' :                 'منوی اصلی',
-        'cart_basket' :          'سبد خرید' ,
+        'home' :                 'منوی اصلی  🏛️',
+        'cart_basket' :          'سبد خرید  🛒' ,
         'user_profile' :         'مشخصات کاربری',
         'full_name':             'نام و نام خانوادگی' ,
         'mobile' :               'شماره موبایل' ,
         'personal_id'  :         'کد ملی' ,
         'adress' :               'آدرس',
         'send number':          'ارسال شماره موبایل',
-        'kala' :                'کالا',
-        'invoice' :             'فاکتور',
-        'admin' :               'ادمین',
-        'finacial_department' : 'امور مالی',
-        'reports' :             'گزارشات',
-        'kala' :                'کالا',
+        'kala' :                'کالا  📦',
+        'invoice' :             'فاکتور  🧾',
+        'admin' :               'ادمین  👨🏻‍💻',
+        'finacial_department' : 'امور مالی  💰',
+        'reports' :             'گزارشات  📊',
         'group':                'گروه' ,       
-        'add_group' :           'تعریف گروه جدید',
+        'add_group' :           'تعریف گروه جدید  ➕',
         'category_name':        'نام گروه',
-        'edit':                 'اصلاح',
-        'delete':               'حذف',
-
+        'edit':                 'اصلاح  ✏️',
+        'delete':               'حذف  🗑',
+        'add_kala':             'تعریف کالا جدید  ➕',
+        
         }
 
 command= {  
@@ -135,7 +136,7 @@ def make_inlinekeyboardMarkup_category(cid=None ,mid=None):
         for i in category.keys():
              markup.add(InlineKeyboardButton(f'{i}',callback_data=f'group_edit/{i}'))
         inline_button=button['add_group']
-        markup.add(InlineKeyboardButton(f'{inline_button}   ➕',callback_data='group_add/add'))
+        markup.add(InlineKeyboardButton(f'{inline_button}   ',callback_data='group_add/add'))
         markup.add(InlineKeyboardButton(button['cancel'],callback_data='group_add/cancel'))  
         if mid == None :
             bot.send_message(cid,text['add_group'],reply_markup=markup)  
@@ -182,6 +183,19 @@ def inline_change_group(cid , mid):
     markup.add(InlineKeyboardButton(button['cancel'],callback_data='group_edit/cancel-newname'))
     bot.edit_message_text(text['change_name_group'],cid,mid,reply_markup=markup)
     return
+
+
+def make_inlinekeyboardMarkup_kala(cid=None ,mid=None):
+        markup=InlineKeyboardMarkup() 
+        inline_button=button['add_kala']
+        markup.add(InlineKeyboardButton(button['add_kala'],callback_data='kala_add'))
+        markup.add(InlineKeyboardButton(button['edit'],callback_data='kala_edit'))
+        markup.add(InlineKeyboardButton(button['delete'],callback_data='kala_delete'))
+        markup.add(InlineKeyboardButton(button['back'],callback_data='kala_back'))  
+        if mid == None :
+            bot.send_message(cid,text['add_kala'],reply_markup=markup)  
+        else: 
+            bot.edit_message_text(text['add_kala'],cid,mid,reply_markup=markup)
 
 
 
@@ -430,12 +444,14 @@ def kala_func(message) :
             bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_s=user_step[cid]))
         elif user_step[cid] == 2100 :
             user_step[cid] =2120
+            make_inlinekeyboardMarkup_kala(cid=cid)            
         elif user_step[cid] == 3000:
             user_step[cid] = 3100
             bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_s=user_step[cid]))
         elif user_step[cid] == 3100 :
-            user_step[cid] = 3120        
-        bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_s=user_step[cid]))
+            user_step[cid] = 3120
+            make_inlinekeyboardMarkup_kala(cid=cid)       
+        
 
 @bot.message_handler(func=lambda message : message.text==button['group'])
 def group_func(message) :
@@ -617,6 +633,7 @@ def contact_to_me_func(message):
 
 @bot.message_handler(func=lambda message :True)
 def message_func(message):
+    print(message)
     cid=message.chat.id
     if cid in block_user :return
     if user_step[cid]==1251 :
