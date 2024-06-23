@@ -64,7 +64,7 @@ def create_table_kala():
         buy_price      DOUBLE,
         sale_price     INT,
         name_category  VARCHAR(15),
-        kala_date      DATE NOT NULL ,
+        kala_date      VARCHAR(10) ,
         image_file_id  VARCHAR(200),
         count          SMALLINT (255) DEFAULT 0,
         M              SMALLINT (255) DEFAULT 0,

@@ -80,7 +80,7 @@ def delete_category(name_category):
 # All Function  For Kala  Table
 
 
-def insert_kala( kalaname,name_category ,kala_date,image_file_id, buy_price = 0 , sale_price=0 , count=0,m_size=0,l_size=0,xl_size=0,xxl_size=0):
+def insert_kala( kalaname,name_category ,kala_date,image_file_id,sale_price=0 , buy_price = 0 , count=0,m_size=0,l_size=0,xl_size=0,xxl_size=0):
     conn=mysql.connector.connect(**db_config)
     cursor=conn.cursor()
     SQL_QURY="""INSERT IGNORE INTO kala(kalaname, buy_price , sale_price , name_category , kala_date , image_file_id , count ,M ,L ,XL ,XXL )

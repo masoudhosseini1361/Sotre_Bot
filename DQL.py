@@ -39,10 +39,20 @@ def get_info_kala() :
     conn.close()
     return result
 
+def last_kala_id() :
+    conn=mysql.connector.connect(**db_config)
+    cursor=conn.cursor(dictionary=True)
+    SQL_QURY="""SELECT id FROM kala ORDER BY id DESC LIMIT 1"""
+    cursor.execute(SQL_QURY)
+    result=cursor.fetchall()
+    cursor.close()
+    conn.close()
+    result =result[0]['id']
+    return result
 
 
 if __name__ == "__main__":
-    # pass
+    pass
     # resualt= get_info_category()
     # print(resualt)
     # if len (resualt) !=0 :
@@ -53,8 +63,9 @@ if __name__ == "__main__":
     #         print (name_english,name_persian,show_category ,"\n")
     # else :
     #     print("zero")
-    result=get_info_kala()
-    print(result)
+    # result=get_info_kala()
+    # print(result)
+    # print(last_kala_id())
 """  print(get_info_user())
     result =get_info_user()
     for i in result :

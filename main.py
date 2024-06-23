@@ -136,6 +136,9 @@ bot.set_update_listener(listener)  # register listener
 
 #function 
 
+def date_today():
+    today=date.today()
+    return today
 
 def make_inlinekeyboardMarkup_category(cid=None ,mid=None):
         markup=InlineKeyboardMarkup() 
@@ -252,11 +255,9 @@ def make_ReplyKeyboardMarkup(user_s=None):
         pass
     
     #kala_temp ={cid={kalaname :name ,category:category,image_file_id :file_id ,sale_price:price,}}
-def  insert_kala_func(cid ) :
+def  insert_kala_func(cid , mid = None ) :
     kala_cid=kala_temp[cid]
-    mid=kala_cid['mid']
     markup=InlineKeyboardMarkup()
-    # string=f'{kala_temp[cid]['category']}:{button['category_name']}'
     category=kala_cid['category']
     category1=button['category_name']
     photo_image=button['photo_image']
@@ -278,10 +279,13 @@ def  insert_kala_func(cid ) :
         markup.add(InlineKeyboardButton(f'{sale_price} : {price}',callback_data='kala_add/saleprice'))  
     else :
         markup.add(InlineKeyboardButton(f'{sale_price} : ',callback_data='kala_add/saleprice'))
+        
     markup.add(InlineKeyboardButton(button['register'],callback_data='kala_add/sabt'))
     markup.add(InlineKeyboardButton(button['cancel'],callback_data='kala_add/cancel'))        
-    bot.edit_message_text(text['add_kala_detail'],cid,mid,reply_markup=markup)
-    
+    if mid == None :
+        bot.send_message(cid,text['add_kala_detail'],reply_markup=markup)  
+    else:    
+        bot.edit_message_text(text['add_kala_detail'],cid,mid,reply_markup=markup)
         
         
            
@@ -406,8 +410,45 @@ def call_back_handler(call):
                         user_step[cid] = 3121    
                     show_inlinekeyboardMarkup_category(cid=cid ,mid=mid)
                 elif data in category.keys():
-                    kala_temp.update({cid:{'category':data,'mid':mid}})
-                    insert_kala_func(cid=cid )                   
+                    kala_temp.update({cid:{'category':data}})
+                    insert_kala_func(cid=cid , mid =mid)
+                elif data == 'imageid' :
+                    bot.edit_message_text(text['image_message'],cid,mid,reply_markup=None)  
+                elif data =='kalaname' :
+                    bot.edit_message_text(text['kala_message'],cid,mid,reply_markup=None) 
+                elif data == 'saleprice' :
+                    if user_step[cid] == 2121 :
+                        user_step[cid]= 2121.1
+                    elif user_step[cid]== 3121 :
+                        user_step[cid] = 3121.1
+                    bot.edit_message_text(text['price_message'],cid,mid,reply_markup=None)
+                elif data =='sabt' :
+                    # insert_kala( kalaname,name_category ,kala_date,image_file_id, buy_price = 0 , sale_price=0 , count=0,m_size=0,l_size=0,xl_size=0,xxl_size=0):
+                     #kala_temp ={cid={kalaname :name ,category:category,image_file_id :file_id ,sale_price:price,}}
+                    # kala={id:[kalaname,buy_price,sale_price,name_category,kala_date,image_file_id,count,M,L,XL,XXL],.....}
+                    kalaname =kala_temp[cid]['kalaname']
+                    name_category=kala_temp[cid]['category']
+                    file_id=kala_temp[cid]['image_file_id']
+                    sale_price=kala_temp[cid]['sale_price'] 
+                    kala_date =date_today()
+                    print(kala_date)
+                    insert_kala( kalaname=kalaname,name_category=name_category ,kala_date=kala_date,image_file_id=file_id,sale_price=sale_price )
+                    id =last_kala_id()
+                    kala.update({id:[kalaname,0,sale_price,name_category,kala_date,file_id,0,0,0,0,0]})
+                    bot.answer_callback_query(call_id, text['sabt'])
+                    bot.edit_message_reply_markup(cid, mid, reply_markup=None)
+                    kala_temp.pop(cid)
+
+
+                elif data =='cancel' :
+                    kala_temp.pop(cid)
+                    bot.edit_message_reply_markup(cid, mid, reply_markup=None)                    
+                    if user_step[cid] ==2121 :
+                        user_step[cid] =2100
+                    elif user_step[cid] ==3121  :
+                        user_step[cid]=310   
+                
+                        
             elif data.startswith('edit'):
                 data=data.split('/')[-1]        
                 if data=='edit':
@@ -432,6 +473,7 @@ def call_back_handler(call):
                     elif user_step[cid]== 3120 :
                         user_step[cid] = 3100 
                     bot.edit_message_reply_markup(cid, mid, reply_markup=None) 
+            
         else :  
             bot.edit_message_reply_markup(cid, mid, reply_markup=None)
               
@@ -728,6 +770,21 @@ def contact_to_me_func(message):
 
 
 
+@bot.message_handler(content_types=['photo'])
+def photo_handler(message):
+    cid =message.chat.id
+    if cid in block_user: return
+    if user_step[cid] == 2121 or user_step[cid] == 3121:
+        file_id = message.photo[-1].file_id
+        print (file_id)
+        kala_cid=kala_temp[cid]
+        kala_cid.update({'image_file_id' :file_id})
+        kala_temp.update({cid : kala_cid})
+        insert_kala_func(cid)
+
+
+
+
 @bot.message_handler(func=lambda message :True)
 def message_func(message):
     print(message)
@@ -783,9 +840,23 @@ def message_func(message):
         mid=category_temp[cid][1]
         category_temp.update({cid:[name_category,mid]})
         inline_change_group(cid , mid)
-    
-    
-    
+    elif user_step[cid] ==3121 or user_step[cid] ==2121 :
+        kala_cid= kala_temp[cid]
+        kala_name =message.text
+        kala_cid.update({'kalaname' :kala_name})
+        kala_temp.update({cid:kala_cid})
+        insert_kala_func(cid)
+    elif user_step[cid] ==3121.1 or user_step[cid] ==2121.1 :
+        if user_step[cid] == 2121.1 :
+            user_step[cid]= 2121
+        elif user_step[cid]== 3121.1 :
+            user_step[cid] = 3121
+        kala_cid= kala_temp[cid]
+        price =message.text
+        kala_cid.update({'sale_price': price })
+        kala_temp.update({cid:kala_cid})
+        insert_kala_func(cid)
+
     
     
 bot.infinity_polling()
