@@ -138,6 +138,7 @@ bot.set_update_listener(listener)  # register listener
 
 def date_today():
     today=date.today()
+    today=today.strftime("%Y/%m/%d")
     return today
 
 def make_inlinekeyboardMarkup_category(cid=None ,mid=None):
@@ -423,22 +424,25 @@ def call_back_handler(call):
                         user_step[cid] = 3121.1
                     bot.edit_message_text(text['price_message'],cid,mid,reply_markup=None)
                 elif data =='sabt' :
-                    # insert_kala( kalaname,name_category ,kala_date,image_file_id, buy_price = 0 , sale_price=0 , count=0,m_size=0,l_size=0,xl_size=0,xxl_size=0):
-                     #kala_temp ={cid={kalaname :name ,category:category,image_file_id :file_id ,sale_price:price,}}
-                    # kala={id:[kalaname,buy_price,sale_price,name_category,kala_date,image_file_id,count,M,L,XL,XXL],.....}
-                    kalaname =kala_temp[cid]['kalaname']
-                    name_category=kala_temp[cid]['category']
-                    file_id=kala_temp[cid]['image_file_id']
-                    sale_price=kala_temp[cid]['sale_price'] 
-                    kala_date =date_today()
-                    print(kala_date)
-                    insert_kala( kalaname=kalaname,name_category=name_category ,kala_date=kala_date,image_file_id=file_id,sale_price=sale_price )
-                    id =last_kala_id()
-                    kala.update({id:[kalaname,0,sale_price,name_category,kala_date,file_id,0,0,0,0,0]})
-                    bot.answer_callback_query(call_id, text['sabt'])
-                    bot.edit_message_reply_markup(cid, mid, reply_markup=None)
-                    kala_temp.pop(cid)
-
+                    kala_cid=kala_temp[cid]
+                    if 'kalaname' not in kala_cid.keys() or  'image_file_id' not in kala_cid.keys() or 'sale_price' not in kala_cid.keys() :
+                        bot.send_message(cid ,text['all_detail'])
+                    else :
+                        kalaname =kala_temp[cid]['kalaname']
+                        name_category=kala_temp[cid]['category']
+                        file_id=kala_temp[cid]['image_file_id']
+                        sale_price=int( kala_temp[cid]['sale_price']) 
+                        kala_date =date_today()
+                        insert_kala( kalaname=kalaname,name_category=name_category ,kala_date=kala_date,image_file_id=file_id,sale_price=sale_price )
+                        id =last_kala_id()
+                        kala.update({id:[kalaname,0,sale_price,name_category,kala_date,file_id,0,0,0,0,0]})
+                        bot.answer_callback_query(call_id, text['sabt'])
+                        bot.edit_message_text(text['sabt_kala'],cid, mid, reply_markup=None)
+                        kala_temp.pop(cid)
+                        if user_step[cid] == 2121 :
+                            user_step[cid]= 2100
+                        elif user_step[cid]== 3121 :
+                            user_step[cid] = 3100
 
                 elif data =='cancel' :
                     kala_temp.pop(cid)
@@ -446,7 +450,7 @@ def call_back_handler(call):
                     if user_step[cid] ==2121 :
                         user_step[cid] =2100
                     elif user_step[cid] ==3121  :
-                        user_step[cid]=310   
+                        user_step[cid]=3100   
                 
                         
             elif data.startswith('edit'):
