@@ -91,7 +91,14 @@ def insert_kala( kalaname,name_category ,kala_date,image_file_id,sale_price=0 , 
     cursor.close()
     conn.close()
 
-
+def edit_update_kala(id,kalaname,image_file_id,sale_price):
+    conn=mysql.connector.connect(**db_config)
+    cursor=conn.cursor()
+    SQL_QURY="""UPDATE kala SET kalaname=%s ,sale_price=%s,image_file_id=%s WHERE id=%s"""
+    cursor.execute(SQL_QURY,(kalaname,sale_price ,image_file_id,id))
+    conn.commit()
+    cursor.close()
+    conn.close()
 
 
 if __name__ == "__main__":
@@ -102,3 +109,4 @@ if __name__ == "__main__":
   # update_category(new_name_category='شلور' ,old_name_category='تی شرت' )
    #delete_category(name_category='شلوار')
 #    insert_kala( kalaname='polo',name_category='تی شرت' ,kala_date='1403/03/27',image_file_id='d:\python\project\image.jpg', buy_price = 0 , sale_price=0 , count=0,m_size=0,l_size=0,xl_size=0,xxl_size=0)
+    # edit_update_kala(id=2,kalaname='BURBERRY',image_file_id='D:\share\13189.jpg',sale_price=850000)

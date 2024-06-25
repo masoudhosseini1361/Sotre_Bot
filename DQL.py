@@ -51,8 +51,34 @@ def last_kala_id() :
     return result
 
 
+def get_field_kalaname() :
+    conn=mysql.connector.connect(**db_config)
+    cursor=conn.cursor(dictionary=True)
+    SQL_QURY="""SELECT  kalaname FROM kala """
+    cursor.execute(SQL_QURY)
+    result=cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return result
+    
+def get_infokala_where_category(category):
+    conn=mysql.connector.connect(**db_config)
+    cursor=conn.cursor(dictionary=True)
+    SQL_QURY="SELECT id,kalaname,sale_price FROM kala WHERE name_category=%s"
+    cursor.execute(SQL_QURY,(category,))
+    result=cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return result
+    
+
+
+
+
 if __name__ == "__main__":
     pass
+    # print(get_infokala_where_category(category='تی شرت'))
+    # print( get_field_kalaname())
     # resualt= get_info_category()
     # print(resualt)
     # if len (resualt) !=0 :
@@ -66,9 +92,10 @@ if __name__ == "__main__":
     # result=get_info_kala()
     # print(result)
     # print(last_kala_id())
-"""  print(get_info_user())
-    result =get_info_user()
-    for i in result :
-        print(i)
-        print(i['cid'])
-        """
+    
+#   print(get_info_user())
+    # result =get_info_user()
+    # for i in result :
+    #     print(i)
+    #     print(i['cid'])
+        
