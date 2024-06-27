@@ -2,6 +2,5 @@
 __pycache__/
 my_venv/
 *.log
-requirment.txt
 text.txt
 Config.py
