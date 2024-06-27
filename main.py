@@ -218,7 +218,7 @@ def show_inlinekeyboardMarkup_category(cid=None ,mid=None):
             for i in category.keys():
                 markup.add(InlineKeyboardButton(f'{i}',callback_data=f'kala_edit/{i}'))
             markup.add(InlineKeyboardButton(button['back'],callback_data='kala_edit/back'))
-            markup.add(InlineKeyboardButton(button['cancel'],callback_data='kala_delete/cancel'))
+            markup.add(InlineKeyboardButton(button['cancel'],callback_data='kala_edit/cancel'))
         if user_step[cid]==2123 or user_step[cid]==3123 :           
             for i in category.keys():
                 markup.add(InlineKeyboardButton(f'{i}',callback_data=f'kala_deldte/{i}'))
@@ -305,7 +305,7 @@ def edit_kala_func(cid ,mid=None,id=None):
             kala_id=i['id']
             kalaname=i["kalaname"]
             sale_price1=i['sale_price']
-
+            break
 
     markup=InlineKeyboardMarkup()
     if 'id' in kala_cid.keys() :
@@ -329,7 +329,7 @@ def edit_kala_func(cid ,mid=None,id=None):
         markup.add(InlineKeyboardButton(button['register'],callback_data=f'kala_edit/id=sabt'))
         markup.add(InlineKeyboardButton(button['cancel'],callback_data=f'kala_edit/id=cancel'))
         if mid==None :
-            bot.send_message(text['change_kala1'],cid,reply_markup=markup)
+            bot.send_message(cid,text['change_kala1'],reply_markup=markup)
         else :
             bot.edit_message_text(text['change_kala1'],cid,mid,reply_markup=markup)
                    
@@ -352,7 +352,8 @@ def call_back_handler(call):
     data = call.data
     mid = call.message.message_id
     call_id = call.id
-    print(f'cid: {cid}, data: {data}, mid: {mid}, id: {call_id}')
+    u_step=user_step[cid]
+    print(f'cid: {cid}, data: {data}, mid: {mid}, id: {call_id},  user step:{u_step}')
     # if call.message.date > time.time() + 10:
     #     bot.edit_message_reply_markup(cid, mid, reply_markup=None)
     if call.message.date < (time.time()-86400) :
@@ -377,7 +378,7 @@ def call_back_handler(call):
                             user_step[cid]=3100   
                         name_category =category_temp[cid][0]
                         insert_category(name_category=name_category,show_category='YES')
-                        bot.answer_callback_query(call_id, text['sabt'])
+                        bot.answer_callback_query(call_id, text['sabt'],show_alert=True,cache_time=3)
                         bot.edit_message_reply_markup(cid, mid, reply_markup=None)
                         category.update({name_category:"YES"})
                         category_temp.pop(cid)
@@ -430,7 +431,7 @@ def call_back_handler(call):
                         old_name_category=category_oldname[cid]
                         show_category=category[old_name_category]
                         update_category(new_name_category=new_name_category ,old_name_category=old_name_category)
-                        bot.answer_callback_query(call_id, text['sabt'])
+                        bot.answer_callback_query(call_id, text['sabt'],show_alert=True,cache_time=3)
                         bot.edit_message_reply_markup(cid, mid, reply_markup=None)
                         category.pop(old_name_category)
                         category.update({new_name_category:show_category})
@@ -449,7 +450,7 @@ def call_back_handler(call):
                 elif data.split('-')[0]=='back':
                    make_inlinekeyboardMarkup_category(cid=cid ,mid=mid)   
             else :
-                bot.answer_callback_query(call_id, text['no_data'])  
+                bot.answer_callback_query(call_id, text['no_data'],cache_time=3)  
                 bot.edit_message_reply_markup(cid, mid, reply_markup=None)    
         else :
             bot.edit_message_reply_markup(cid, mid, reply_markup=None)        
@@ -490,23 +491,30 @@ def call_back_handler(call):
                         insert_kala( kalaname=kalaname,name_category=name_category ,kala_date=kala_date,image_file_id=file_id,sale_price=sale_price )
                         id =last_kala_id()
                         kala.update({id:[kalaname,0,sale_price,name_category,kala_date,file_id,0,0,0,0,0]})
-                        bot.answer_callback_query(call_id, text['sabt'])
+                        bot.answer_callback_query(call_id, text['sabt'],show_alert=True,cache_time=3)
                         bot.edit_message_text(text['sabt_kala'],cid, mid, reply_markup=None)
                         kala_temp.pop(cid)
                         if user_step[cid] == 2121 :
                             user_step[cid]= 2100
                         elif user_step[cid]== 3121 :
                             user_step[cid] = 3100
-
+                elif data=='back':
+                    if cid in kala_temp.keys():
+                        kala_temp.pop(cid)
+                        if user_step[cid]==3121 :
+                            user_step[cid]= 3120
+                        if user_step[cid]==2121 :
+                            user_step[cid]= 2120
+                    make_inlinekeyboardMarkup_kala(cid=cid ,mid=mid)
                 elif data =='cancel' :
-                    kala_temp.pop(cid)
+                    if cid in kala_temp.keys():
+                        kala_temp.pop(cid)
                     bot.edit_message_reply_markup(cid, mid, reply_markup=None)                    
                     if user_step[cid] ==2121 :
                         user_step[cid] =2100
                     elif user_step[cid] ==3121  :
                         user_step[cid]=3100   
-                
-                        
+                                        
             elif data.startswith('edit'):
                 data=data.split('/')[-1]        
                 if data=='edit':
@@ -539,7 +547,7 @@ def call_back_handler(call):
                             bot.edit_message_text(text['price_message'],cid,mid,reply_markup=None)
                         elif data =='sabt' :
                             kala_cid=kala_temp[cid]
-                            id=kala_cid[id]
+                            id=kala_cid['id']
                             kalaname=kala[id][0]
                             buy_price=kala[id][1]
                             sale_price=kala[id][2]
@@ -567,14 +575,22 @@ def call_back_handler(call):
                             elif user_step[cid]== 3122 :
                                 user_step[cid] = 3100
 
+                        elif data=='back':
+                            if cid in kala_temp.keys():
+                                kala_temp.pop(cid)
+                                if user_step[cid]==3122 :
+                                    user_step[cid]= 3120
+                                if user_step[cid]==2122 :
+                                    user_step[cid]= 2120
+                            make_inlinekeyboardMarkup_kala(cid=cid ,mid=mid)
                         elif data =='cancel' :
-                            kala_temp.pop(cid)
+                            if cid in kala_temp.keys():
+                                kala_temp.pop(cid)
                             bot.edit_message_reply_markup(cid, mid, reply_markup=None)                    
                             if user_step[cid] ==2122 :
                                 user_step[cid] =2100
                             elif user_step[cid] ==3122  :
                                 user_step[cid]=3100   
-                        
 
             elif data.startswith('delete'):
                 data=data.split('/')[-1]
@@ -584,6 +600,24 @@ def call_back_handler(call):
                     elif user_step[cid]== 3120 :
                         user_step[cid] = 3123
                     show_inlinekeyboardMarkup_category(cid=cid ,mid=mid)
+
+                elif data=='back':
+                    # if cid in kala_temp.keys():
+                    #     kala_temp.pop(cid)
+                    if user_step[cid]==3123 :
+                        user_step[cid]= 3120
+                    if user_step[cid]==2123 :
+                        user_step[cid]= 2120
+                    make_inlinekeyboardMarkup_kala(cid=cid ,mid=mid)
+                elif data =='cancel' :
+                    if cid in kala_temp.keys():
+                        kala_temp.pop(cid)
+                    bot.edit_message_reply_markup(cid, mid, reply_markup=None)                    
+                    if user_step[cid] ==2123 :
+                        user_step[cid] =2100
+                    elif user_step[cid] ==3123  :
+                        user_step[cid]=3100   
+                
             elif data.startswith('back'):
                 data=data.split('/')[-1]
                 if data=='back' :
@@ -597,7 +631,7 @@ def call_back_handler(call):
             bot.edit_message_reply_markup(cid, mid, reply_markup=None)
               
     else :
-        bot.answer_callback_query(call_id, text['no_data'])  
+        bot.answer_callback_query(call_id, text['no_data'],cache_time=3)  
         bot.edit_message_reply_markup(cid, mid, reply_markup=None)      
 
 
