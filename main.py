@@ -64,7 +64,7 @@ if len(result) !=0 :
 
 
 button= {
-        'my_acount' :            'حساب کاربری من  👤',
+        'my_account' :            'حساب کاربری من  👤',
         'help' :                 'راهنمای استفاده از بات',
         'buy'  :                 'خرید',
         'contact_to_me' :        'تماس با ما  📞' ,
@@ -83,6 +83,7 @@ button= {
         'adress' :               'آدرس',
         'send number':          'ارسال شماره موبایل',
         'kala' :                'کالا  📦',
+        'account':              'طرف حساب',
         'invoice' :             'فاکتور  🧾',
         'admin' :               'ادمین  👨🏻‍💻',
         'finacial_department' : 'امور مالی  💰',
@@ -212,18 +213,15 @@ def show_inlinekeyboardMarkup_category(cid=None ,mid=None):
         if user_step[cid]==2121 or user_step[cid]==3121 :           
             for i in category.keys():
                 markup.add(InlineKeyboardButton(f'{i}',callback_data=f'kala_add/{i}'))
-            markup.add(InlineKeyboardButton(button['back'],callback_data='kala_add/back'))
-            markup.add(InlineKeyboardButton(button['cancel'],callback_data='kala_add/cancel'))
+            markup.add(InlineKeyboardButton(button['back'],callback_data='kala_add/back'),InlineKeyboardButton(button['cancel'],callback_data='kala_add/cancel'))
         if user_step[cid]==2122 or user_step[cid]==3122 :           
             for i in category.keys():
                 markup.add(InlineKeyboardButton(f'{i}',callback_data=f'kala_edit/{i}'))
-            markup.add(InlineKeyboardButton(button['back'],callback_data='kala_edit/back'))
-            markup.add(InlineKeyboardButton(button['cancel'],callback_data='kala_edit/cancel'))
+            markup.add(InlineKeyboardButton(button['back'],callback_data='kala_edit/back'),InlineKeyboardButton(button['cancel'],callback_data='kala_edit/cancel'))
         if user_step[cid]==2123 or user_step[cid]==3123 :           
             for i in category.keys():
-                markup.add(InlineKeyboardButton(f'{i}',callback_data=f'kala_deldte/{i}'))
-            markup.add(InlineKeyboardButton(button['back'],callback_data='kala_delete/back'))
-            markup.add(InlineKeyboardButton(button['cancel'],callback_data='kala_delete/cancel'))
+                markup.add(InlineKeyboardButton(f'{i}',callback_data=f'kala_delete/{i}'))
+            markup.add(InlineKeyboardButton(button['back'],callback_data='kala_delete/back'),InlineKeyboardButton(button['cancel'],callback_data='kala_delete/cancel'))
         bot.edit_message_text(text['choice_group'],cid,mid,reply_markup=markup)
 
 
@@ -234,8 +232,8 @@ def make_ReplyKeyboardMarkup(user_s=None):
     markup=ReplyKeyboardMarkup(resize_keyboard=True)
     if user_s >=3000 :
         if user_s  == 3000 :
-            markup.add(button['admin'],button['invoice'],button['kala'])
-            markup.add(button['reports'],button['finacial_department'])
+            markup.add(button['account'],button['invoice'],button['kala'])
+            markup.add(button['reports'],button['finacial_department'],button['admin'])
             return(markup)
         elif user_s ==3100 :
             markup.add(button['kala'],button['group'])
@@ -244,7 +242,7 @@ def make_ReplyKeyboardMarkup(user_s=None):
         
     elif user_s >=2000  and user_s < 3000 :
         if user_s == 2000 :
-            markup.add(button['invoice'],button['kala'])
+            markup.add(button['account'],button['invoice'],button['kala'])
             markup.add(button['reports'],button['finacial_department'])
             return(markup)
         elif user_s ==2100 :
@@ -290,7 +288,8 @@ def  insert_kala_func(cid , mid = None ) :
 
 
         
-def edit_kala_func(cid ,mid=None,id=None):
+def edit_kala_func(cid ,mid=None,id=None,call_id=None):
+    markup=InlineKeyboardMarkup()
     kala_cid=kala_temp[cid]
     category=kala_cid['category']
     category1=button['category_name']
@@ -298,6 +297,9 @@ def edit_kala_func(cid ,mid=None,id=None):
     description=button['description']
     sale_price=button['sale_price']
     result =get_infokala_where_category(category)
+    if len(result)== 0:
+        bot.answer_callback_query(call_id, text['no_kala'],show_alert=True,cache_time=3)
+        return
     if 'id' in kala_cid.keys():
         id=kala_cid['id']
     for i in result :
@@ -307,7 +309,7 @@ def edit_kala_func(cid ,mid=None,id=None):
             sale_price1=i['sale_price']
             break
 
-    markup=InlineKeyboardMarkup()
+    
     if 'id' in kala_cid.keys() :
         markup.add(InlineKeyboardButton(f'{category1} : {category}',callback_data=f'kala_edit/id=none'))
         if 'image_file_id' in kala_cid.keys():
@@ -342,6 +344,42 @@ def edit_kala_func(cid ,mid=None,id=None):
        bot.edit_message_text(text['change_kala'],cid,mid,reply_markup=markup)     
         
 
+def delete_kala_func(cid ,mid=None,id=None,call_id=None):
+    kala_cid=kala_temp[cid]
+    category=kala_cid['category']
+    result =get_infokala_where_category(category)
+    if len(result)== 0:
+        bot.answer_callback_query(call_id, text['no_kala'],show_alert=True,cache_time=3)
+        return
+    if 'id' in kala_cid.keys():
+        id=kala_cid['id']
+    
+    markup=InlineKeyboardMarkup()
+    if 'id' in kala_cid.keys() :
+       result =get_info_salrow_where_kala_id(kala_id=id)
+       print(len(result))
+       if len(result) == 0:
+           kala_temp.pop(cid)
+           kala.pop(id)
+           delete_kala(id=id) 
+           bot.edit_message_text(text['delete_kala'],cid,mid,reply_markup=None)
+           bot.answer_callback_query(call_id, text['delete_kala1'],show_alert=True,cache_time=3)
+       else :
+           kala_temp.pop(cid)
+           bot.edit_message_text(text['delete_kala'],cid,mid,reply_markup=None)
+           bot.answer_callback_query(call_id, text['delete_kala2'],show_alert=True,cache_time=3) 
+       if user_step[cid]==3123 :
+           user_step[cid]=3100
+       elif user_step[cid]==2123:
+           user_step[cid]=2100                                                  
+    else :
+       for i in result :
+            kala_id=i['id']
+            kalaname=i["kalaname"]
+            description = f'کد کالا :{kala_id} ----نام کالا :{kalaname}'
+            markup.add(InlineKeyboardButton(description,callback_data= f'kala_delete/id={kala_id}'))
+       markup.add(InlineKeyboardButton(button['back'],callback_data= f'kala_delete/id=back'),InlineKeyboardButton(button['cancel'],callback_data= f'kala_delete/id=cancel'))
+       bot.edit_message_text(text['delete_kala'],cid,mid,reply_markup=markup)     
 
 
 # Inline QURY HANDLER
@@ -394,10 +432,15 @@ def call_back_handler(call):
                 data= data.split('/')[-1]
                # print(data,'in')
                 if data in category.keys():
-                    category_temp.update({cid:[data,mid]})
-                    category_oldname.update({cid:data})
-                    # print(data,'2')
-                    inline_edit_group(cid , mid)
+                    result =get_infokala_where_category(data)
+                    if len(result)== 0:
+                        category_temp.update({cid:[data,mid]})
+                        category_oldname.update({cid:data})
+                        # print(data,'2')
+                        inline_edit_group(cid , mid)
+                    else :
+                        markup=InlineKeyboardMarkup()
+                        bot.answer_callback_query(call_id, text['no_delete_group'],show_alert=True,cache_time=3)
                 elif data.split('-')[0] =='edit' :
                     data= data.split('-')[0]
                     inline_change_group(cid , mid)   
@@ -525,7 +568,7 @@ def call_back_handler(call):
                     show_inlinekeyboardMarkup_category(cid=cid ,mid=mid)
                 elif data in category.keys():
                     kala_temp.update({cid:{'category':data}})
-                    edit_kala_func(cid ,mid )
+                    edit_kala_func(cid ,mid ,call_id=call_id)
                 elif data.startswith('id') :
                     kala_cid=kala_temp[cid]
                     data=data.split('=')[-1]
@@ -591,6 +634,23 @@ def call_back_handler(call):
                                 user_step[cid] =2100
                             elif user_step[cid] ==3122  :
                                 user_step[cid]=3100   
+                elif data =='back' :
+                    if cid in kala_temp.keys():
+                        kala_temp.pop(cid)
+                    bot.edit_message_reply_markup(cid, mid, reply_markup=None)                    
+                    if user_step[cid] ==2122 :
+                        user_step[cid] =2120
+                    elif user_step[cid] ==3122  :
+                        user_step[cid]=3120
+                    make_inlinekeyboardMarkup_kala(cid,mid)
+                elif data == 'cancel' :
+                    if cid in kala_temp.keys():
+                        kala_temp.pop(cid)
+                    bot.edit_message_reply_markup(cid, mid, reply_markup=None)                    
+                    if user_step[cid] ==2122 :
+                        user_step[cid] =2100
+                    elif user_step[cid] ==3122  :
+                        user_step[cid]=3100                 
 
             elif data.startswith('delete'):
                 data=data.split('/')[-1]
@@ -599,8 +659,30 @@ def call_back_handler(call):
                             user_step[cid]= 2123
                     elif user_step[cid]== 3120 :
                         user_step[cid] = 3123
-                    show_inlinekeyboardMarkup_category(cid=cid ,mid=mid)
-
+                    show_inlinekeyboardMarkup_category(cid=cid ,mid=mid)                    
+                elif data in category.keys():
+                    kala_temp.update({cid:{'category':data}})
+                    delete_kala_func(cid ,mid ,call_id=call_id)
+                elif data.startswith('id') :
+                    kala_cid=kala_temp[cid]
+                    data=data.split('=')[-1]
+                    if data.isnumeric()==True :
+                        id=int(data)
+                        kala_cid.update({'id':id})
+                        kala_temp.update({cid:kala_cid})
+                        delete_kala_func(cid ,mid,id=id,call_id=call_id)
+                    elif data=='back':
+                        if cid in kala_temp.keys():
+                            kala_temp.pop(cid)
+                        show_inlinekeyboardMarkup_category(cid ,mid)    
+                    elif data=='camcel':
+                        if cid in kala_temp.keys():
+                            kala_temp.pop(cid)
+                        if user_step[cid] ==2123 :
+                            user_step[cid] =2100
+                        elif user_step[cid] ==3123  :
+                            user_step[cid]=3100                        
+                        bot.edit_message_reply_markup(cid, mid, reply_markup=None)                                                    
                 elif data=='back':
                     # if cid in kala_temp.keys():
                     #     kala_temp.pop(cid)
@@ -612,11 +694,11 @@ def call_back_handler(call):
                 elif data =='cancel' :
                     if cid in kala_temp.keys():
                         kala_temp.pop(cid)
-                    bot.edit_message_reply_markup(cid, mid, reply_markup=None)                    
                     if user_step[cid] ==2123 :
                         user_step[cid] =2100
                     elif user_step[cid] ==3123  :
-                        user_step[cid]=3100   
+                        user_step[cid]=3100                        
+                    bot.edit_message_reply_markup(cid, mid, reply_markup=None)                       
                 
             elif data.startswith('back'):
                 data=data.split('/')[-1]
@@ -666,7 +748,7 @@ def command_start(message):
             user_cid.append(cid)
             user_profile.update({cid:[None,None,None,username,None]})          
             markup=ReplyKeyboardMarkup(resize_keyboard=True)
-            markup.add(button['my_acount'],button['buy'])
+            markup.add(button['my_account'],button['buy'])
             markup.add(button['contact_to_me'],button['help'])
             bot.send_message(cid,text['select_menu'],reply_markup=markup)
         
@@ -676,14 +758,15 @@ def main_command(message) :
     if cid in block_user : return
     if user_step[cid] <2000 :
         markup=ReplyKeyboardMarkup(resize_keyboard=True)
-        markup.add(button['my_acount'],button['buy'])
+        markup.add(button['my_account'],button['buy'])
         markup.add(button['contact_to_me'],button['help'])
         bot.send_message(cid,text['select_menu'],reply_markup=markup)
     elif user_step[cid] >= 2000 and user_step[cid] <3000 :
             pass
     elif user_step[cid] >= 3000 :
         bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_s=user_step[cid]))
-        
+
+ 
 
 @bot.message_handler(commands=['help'])
 def help_func(message) :
@@ -766,32 +849,32 @@ def group_func(message) :
 @bot.message_handler(func=lambda message : message.text==button['home'])
 def home_func(message):
     cid=message.chat.id
-    print(user_step[cid])
+    print(f'user step : {user_step[cid]}')
     if cid in block_user :return
     if user_step[cid] <2000 :
         user_step[cid]=1000
         markup=ReplyKeyboardMarkup(resize_keyboard=True)
-        markup.add(button['my_acount'],button['buy'])
+        markup.add(button['my_account'],button['buy'])
         markup.add(button['contact_to_me'],button['help'])
         bot.send_message(cid,text['select_menu'],reply_markup=markup)
     elif user_step[cid] >=2000 and user_step[cid] <3000 :
             user_step[cid]=2000
             markup=ReplyKeyboardMarkup(resize_keyboard=True)
-            markup.add(button['invoice'],button['kala'])
+            markup.add(button['account'],button['invoice'],button['kala'])
             markup.add(button['reports'],button['finacial_department'])
 
             bot.send_message(cid,text['select_menu'],reply_markup=markup)
     elif user_step[cid] >=3000 :
             user_step[cid]=3000
             markup=ReplyKeyboardMarkup(resize_keyboard=True)
-            markup.add(button['admin'],button['invoice'],button['kala'])
-            markup.add(button['reports'],button['finacial_department'])
+            markup.add(button['account'],button['invoice'],button['kala'])
+            markup.add(button['reports'],button['finacial_department'],button['admin'])
 
             bot.send_message(cid,text['select_menu'],reply_markup=markup)
         
         
        
-@bot.message_handler(func=lambda message : message.text==button['my_acount'])
+@bot.message_handler(func=lambda message : message.text==button['my_account'])
 def button_buy(message) :
     cid=message.chat.id
     if cid in block_user :return

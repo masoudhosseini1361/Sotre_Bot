@@ -72,11 +72,28 @@ def get_infokala_where_category(category):
     return result
     
 
+#All Function for sale invoice table
 
 
+
+
+
+
+#All Function for sale_row table
+
+def get_info_salrow_where_kala_id(kala_id):
+    conn=mysql.connector.connect(**db_config)
+    cursor=conn.cursor(dictionary=True)
+    SQL_QURY="SELECT i_number FROM sale_row WHERE kala_id=%s"
+    cursor.execute(SQL_QURY,(kala_id,))
+    result=cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return result
 
 if __name__ == "__main__":
     pass
+    # print (get_info_salrow_where_kala_id(kala_id=4))
     # print(get_infokala_where_category(category='تی شرت'))
     # print( get_field_kalaname())
     # resualt= get_info_category()

@@ -100,9 +100,20 @@ def edit_update_kala(id,kalaname,image_file_id,sale_price):
     cursor.close()
     conn.close()
 
+def delete_kala(id):
+    conn=mysql.connector.connect(**db_config)
+    cursor=conn.cursor()
+    SQL_QURY="""DELETE FROM kala  WHERE id=%s"""
+    cursor.execute(SQL_QURY,(id , ))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+# All Function  For invoice  Table
 
 if __name__ == "__main__":
     pass
+    # delete_kala(id=8)
    #insert_user(cid=342165313,step=1000 ,username='masoud216')
    #update_user(cid=87889742,fullname='masoud hosseini',national_code='0075239000',mobile_phone = '09125227989',adress='prozi street')
    #insert_category(name_category='شلوار',show_category='YES')
