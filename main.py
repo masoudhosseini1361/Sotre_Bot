@@ -64,7 +64,7 @@ if len(result) !=0 :
 
 
 button= {
-        'my_account' :            'حساب کاربری من  👤',
+        'user_account' :         'حساب کاربری من  👤',
         'help' :                 'راهنمای استفاده از بات',
         'buy'  :                 'خرید',
         'contact_to_me' :        'تماس با ما  📞' ,
@@ -83,7 +83,7 @@ button= {
         'adress' :               'آدرس',
         'send number':          'ارسال شماره موبایل',
         'kala' :                'کالا  📦',
-        'account':              'طرف حساب',
+        'admin_account':        'طرف حساب  👤',
         'invoice' :             'فاکتور  🧾',
         'admin' :               'ادمین  👨🏻‍💻',
         'finacial_department' : 'امور مالی  💰',
@@ -98,8 +98,10 @@ button= {
         'photo_image':          'ارسال عکس',
         'description':          'نام کالا',
         'sale_price' :          'قیمت فروش ',
-        
-        
+        'search':               'جستجو  🔎',
+        'add_account' :         'تعریف طرف حساب جدید  ➕',
+        'edit_account':         'اصلاح مشخصات  ✏️',
+        'delete_account':       'حذف طرف حساب  🗑',        
         }
 
 command= {  
@@ -111,8 +113,6 @@ command= {
 def get_user_step(cid):
     return user_step.setdefault(cid, 1000)
 
-def creat_marrkup_button(step) :
-    pass
 
 
 
@@ -224,36 +224,72 @@ def show_inlinekeyboardMarkup_category(cid=None ,mid=None):
             markup.add(InlineKeyboardButton(button['back'],callback_data='kala_delete/back'),InlineKeyboardButton(button['cancel'],callback_data='kala_delete/cancel'))
         bot.edit_message_text(text['choice_group'],cid,mid,reply_markup=markup)
 
-
-
+def make_admin_account_inlinekeyboard(cid , mid=None) :
+    markup =InlineKeyboardMarkup()
+    if user_step[cid] == 2200 or user_step[cid] == 3200:
+        markup.add(InlineKeyboardButton(button['search'],callback_data=f'adminaccount/search'))
+        markup.add(InlineKeyboardButton(button['add_account'],callback_data=f'adminaccount/add'))
+        markup.add(InlineKeyboardButton(button['edit_account'],callback_data=f'adminaccount/edit'))
+        markup.add(InlineKeyboardButton(button['delete_account'],callback_data=f'adminaccount/delete'))
+        markup.add(InlineKeyboardButton(button['back'],callback_data=f'adminaccount/back'))
+    if mid ==None :
+        bot.send_message(cid,text['select_menu'],reply_markup=markup)  
+    else :
+        bot.edit_message_text(text['select_menu'],cid,mid,reply_markup=markup)
+        
+        
+        
+        
+    
 # make ReplyKeyboardMarkup
 
 def make_ReplyKeyboardMarkup(user_s=None):
     markup=ReplyKeyboardMarkup(resize_keyboard=True)
     if user_s >=3000 :
         if user_s  == 3000 :
-            markup.add(button['account'],button['invoice'],button['kala'])
+            # main menu of manager
+            markup.add(button['admin_account'],button['invoice'],button['kala'])
             markup.add(button['reports'],button['finacial_department'],button['admin'])
             return(markup)
         elif user_s ==3100 :
+            # kala menu on manger
             markup.add(button['kala'],button['group'])
+            markup.add(button['home'])
+            return(markup)
+        elif user_s == 3200 :
+            # account menu on manger
             markup.add(button['home'])
             return(markup)
         
     elif user_s >=2000  and user_s < 3000 :
         if user_s == 2000 :
-            markup.add(button['account'],button['invoice'],button['kala'])
+            # main  menu of admin
+            markup.add(button['admin_account'],button['invoice'],button['kala'])
             markup.add(button['reports'],button['finacial_department'])
             return(markup)
         elif user_s ==2100 :
+            # kala menu on admin
             markup.add(button['kala'],button['group'])
             markup.add(button['home'])
             return(markup)
+        elif user_s == 3200 :
+            # account menu on admin
+            markup.add(button['home'])
+            return(markup)        
         
-    elif user_s >= 1000 and user_s <1000 :
-        pass
+    elif user_s >= 1000 and user_s <2000 :
+        if user_s == 1000:
+            # main menu on user
     
-    #kala_temp ={cid={kalaname :name ,category:category,image_file_id :file_id ,sale_price:price,}}
+            markup.add(button['user_account'],button['buy'])
+            markup.add(button['contact_to_me'],button['help'])
+            return(markup)
+        
+        
+
+
+
+#kala_temp ={cid={kalaname :name ,category:category,image_file_id :file_id ,sale_price:price,}}
 def  insert_kala_func(cid , mid = None ) :
     kala_cid=kala_temp[cid]
     markup=InlineKeyboardMarkup()
@@ -711,9 +747,24 @@ def call_back_handler(call):
             
         else :  
             bot.edit_message_reply_markup(cid, mid, reply_markup=None)
+    
+    elif data.startswith('adminaccount'):
+        data=data.split('/')[-1]
+        if data == 'search':
+            pass
+        elif data == 'add' :
+            pass
+        elif data == 'edit' :
+            pass
+        elif data == 'delete' :
+            pass
+        elif data == 'back' :
+            pass
+        else :
+            bot.edit_message_reply_markup(cid, mid, reply_markup=None)
               
     else :
-        bot.answer_callback_query(call_id, text['no_data'],cache_time=3)  
+        bot.answer_callback_query(call_id, text['no_data'],cache_time=5)  
         bot.edit_message_reply_markup(cid, mid, reply_markup=None)      
 
 
@@ -731,12 +782,12 @@ def command_start(message):
     if cid in block_user : return
     if cid in admin :
         user_step.setdefault(cid,2000)
-    if cid in manager :
+        bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_s=user_step[cid]))
+    elif cid in manager :
         user_s=get_user_step(cid)
         if user_s ==3000 :
             if cid in block_user : return
-            bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_s=user_step[cid]))
-          
+            bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_s=user_step[cid]))         
     else:
         bot.send_message(cid,text['welcome'],reply_to_message_id=message.id)
         user_s=get_user_step(cid)
@@ -747,22 +798,17 @@ def command_start(message):
             insert_user(cid=cid ,username=username)
             user_cid.append(cid)
             user_profile.update({cid:[None,None,None,username,None]})          
-            markup=ReplyKeyboardMarkup(resize_keyboard=True)
-            markup.add(button['my_account'],button['buy'])
-            markup.add(button['contact_to_me'],button['help'])
-            bot.send_message(cid,text['select_menu'],reply_markup=markup)
+
+            bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_step[cid]))
         
 @bot.message_handler(commands=['main'])
 def main_command(message) :
     cid=message.chat.id
     if cid in block_user : return
     if user_step[cid] <2000 :
-        markup=ReplyKeyboardMarkup(resize_keyboard=True)
-        markup.add(button['my_account'],button['buy'])
-        markup.add(button['contact_to_me'],button['help'])
-        bot.send_message(cid,text['select_menu'],reply_markup=markup)
+        bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_step[cid]))
     elif user_step[cid] >= 2000 and user_step[cid] <3000 :
-            pass
+        bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_step[cid]))
     elif user_step[cid] >= 3000 :
         bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_s=user_step[cid]))
 
@@ -844,6 +890,21 @@ def group_func(message) :
             user_step[cid] =3100 
         bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_s=user_step[cid]))
     
+# this account for manager adn admin
+@bot.message_handler(func=lambda message : message.text==button['admin_account'])
+def admin_account_func(message):
+    cid=message.chat.id       
+    if cid in block_user : return
+    if user_step [cid] == 2000:
+        user_step[cid] = 2200
+    if user_step[cid] == 3000 :
+        user_step[cid] = 3200 
+    
+    bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_s=user_step[cid]))
+    make_admin_account_inlinekeyboard(cid=cid)   
+
+
+
 
 
 @bot.message_handler(func=lambda message : message.text==button['home'])
@@ -853,29 +914,16 @@ def home_func(message):
     if cid in block_user :return
     if user_step[cid] <2000 :
         user_step[cid]=1000
-        markup=ReplyKeyboardMarkup(resize_keyboard=True)
-        markup.add(button['my_account'],button['buy'])
-        markup.add(button['contact_to_me'],button['help'])
-        bot.send_message(cid,text['select_menu'],reply_markup=markup)
     elif user_step[cid] >=2000 and user_step[cid] <3000 :
             user_step[cid]=2000
-            markup=ReplyKeyboardMarkup(resize_keyboard=True)
-            markup.add(button['account'],button['invoice'],button['kala'])
-            markup.add(button['reports'],button['finacial_department'])
-
-            bot.send_message(cid,text['select_menu'],reply_markup=markup)
     elif user_step[cid] >=3000 :
             user_step[cid]=3000
-            markup=ReplyKeyboardMarkup(resize_keyboard=True)
-            markup.add(button['account'],button['invoice'],button['kala'])
-            markup.add(button['reports'],button['finacial_department'],button['admin'])
-
-            bot.send_message(cid,text['select_menu'],reply_markup=markup)
+    bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_step[cid]))
         
         
-       
-@bot.message_handler(func=lambda message : message.text==button['my_account'])
-def button_buy(message) :
+# this account for user       
+@bot.message_handler(func=lambda message : message.text==button['user_account'])
+def user_account_func(message) :
     cid=message.chat.id
     if cid in block_user :return
     if user_step[cid] >= 2000 :return
