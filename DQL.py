@@ -14,6 +14,33 @@ def get_info_user() :
     conn.close()
     return result
 
+
+
+def search_on_user(fullname=None ,national_code=None ,mobile_phone=None) :
+    conn=mysql.connector.connect(**db_config)
+    cursor=conn.cursor(dictionary=True)
+    if fullname != None :
+        fullname =f'%{fullname}%'
+        SQL_QURY="SELECT * FROM user WHERE fullname like %s"
+        cursor.execute(SQL_QURY,(fullname,))
+    elif national_code !=None:
+        national_code=f'%{national_code}%'
+        SQL_QURY="SELECT * FROM user WHERE national_code like %s"
+        cursor.execute(SQL_QURY,(national_code,))
+    elif  mobile_phone != None :
+        mobile_phone=f'%{mobile_phone}%'
+        SQL_QURY="SELECT * FROM user WHERE mobile_phone like %s"
+        cursor.execute(SQL_QURY,(mobile_phone,))
+    result=cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return result
+       
+
+
+
+
+
 #All Function for category table
 
 
@@ -93,7 +120,10 @@ def get_info_salrow_where_kala_id(kala_id):
 
 if __name__ == "__main__":
     pass
-    # print (get_info_salrow_where_kala_id(kala_id=4))
+    # print(search_on_user(fullname='مسعود حسینی'))
+    # print(search_on_user(mobile_phone='522'))
+    # print(search_on_user(national_code='239'))
+    # # print (get_info_salrow_where_kala_id(kala_id=4))
     # print(get_infokala_where_category(category='تی شرت'))
     # print( get_field_kalaname())
     # resualt= get_info_category()
