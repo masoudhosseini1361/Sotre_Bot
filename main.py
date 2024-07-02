@@ -38,6 +38,7 @@ category_temp=dict()          #category_temp={cid :[name_category,mid]}
 category_oldname=dict()        #category_oldname={cid:oldnamecategory,....}
 kala=dict()                     #kala={id:[kalaname,buy_price,sale_price,name_category,kala_date,image_file_id,count,M,L,XL,XXL],.....}
 kala_temp= dict()               #kala_temp ={cid={kalaname :name ,category:category,image_file_id :file_id ,sale_price:price,}}
+mid_cid=dict()                  #mid_cid={cid:mid,........}
 result = get_info_user()
 for i in result:
     if i['is_block']=='YES' :
@@ -232,7 +233,7 @@ def make_admin_account_inlinekeyboard(cid , mid=None) :
     markup =InlineKeyboardMarkup()
     if user_step[cid] == 2200 or user_step[cid] == 3200:
         markup.add(InlineKeyboardButton(button['search'],callback_data=f'adminaccount/search=search'))
-        markup.add(InlineKeyboardButton(button['add_account'],callback_data=f'adminaccount/add=add'))
+    #    markup.add(InlineKeyboardButton(button['add_account'],callback_data=f'adminaccount/add=add'))
         markup.add(InlineKeyboardButton(button['edit_account'],callback_data=f'adminaccount/edit=edit'))
         markup.add(InlineKeyboardButton(button['delete_account'],callback_data=f'adminaccount/delete=delete'))
         markup.add(InlineKeyboardButton(button['back'],callback_data=f'adminaccount/back=back'))
@@ -252,6 +253,38 @@ def make_search_inlinemarkup(cid, mid=None) :
     else :    
         bot.edit_message_text(text['search_account'],cid,mid,reply_markup=markup)
 
+
+
+def make_edit_adminaccount_inline(cid ,mid=None,result=None) :
+    markup=InlineKeyboardMarkup()
+    if mid == None :
+        mid=mid_cid[cid]
+    if result ==None :    
+        markup.add(InlineKeyboardButton(button['search_name'],callback_data=f'adminaccount/edit=name'))    
+        markup.add(InlineKeyboardButton(button['search_nationalcode'],callback_data=f'adminaccount/edit=nationalcode'))    
+        markup.add(InlineKeyboardButton(button['search_mobile'],callback_data=f'adminaccount/edit=mobile'))    
+        markup.add(InlineKeyboardButton(button['back'],callback_data=f'adminaccount/edit=back'),InlineKeyboardButton(button['cancel'],callback_data=f'adminaccount/edit=cancel'))   
+        bot.edit_message_text(text['search_account'],cid,mid,reply_markup=markup)
+    else :
+        for i in result:
+            id=i['id']
+            cid= i['cid']
+            fullname=i['fullname']
+            username=i['username']
+            national_code=i['national_code']
+            mobile_phone=i['mobile_phone']
+            adress=i['adress']
+            privilege=i['privilege']
+            is_block = i['is_block']
+            user_date=i['user_date']
+            markup.add(InlineKeyboardButton(f'نام : {fullname}--کد ملی :{national_code} --موبایل : {mobile_phone}',callback_data=f'adminaccount/edit=name'))    
+            
+
+    
+    
+    
+
+
     
 # make ReplyKeyboardMarkup
 
@@ -260,7 +293,7 @@ def make_ReplyKeyboardMarkup(user_s=None):
     if user_s >=3000 :
         if user_s  == 3000 :
             # main menu of manager
-            markup.add(button['admin_account'],button['invoice'],button['kala'])
+            markup.add(button['invoice'],button['admin_account'],button['kala'])
             markup.add(button['reports'],button['finacial_department'],button['admin'])
             return(markup)
         elif user_s ==3100 :
@@ -776,12 +809,19 @@ def call_back_handler(call):
                         user_step[cid] = 2211 
                     if user_step[cid]== 3210 :
                         user_step[cid] = 3211                     
-                    bot.edit_message_text(text['message_name'],cid, mid, reply_markup=None)
-                    
+                    bot.edit_message_text(text['message_name'],cid, mid, reply_markup=None)  
                 elif data =='nationalcode':
-                    pass
+                    if user_step[cid]== 2210 :
+                        user_step[cid] = 2212 
+                    if user_step[cid]== 3210 :
+                        user_step[cid] = 3212                     
+                    bot.edit_message_text(text['message_national_code'],cid, mid, reply_markup=None)
                 elif data =='mobile':
-                    pass
+                    if user_step[cid]== 2210 :
+                        user_step[cid] = 2213 
+                    if user_step[cid]== 3210 :
+                        user_step[cid] = 3213                     
+                    bot.edit_message_text(text['enter_mobile'],cid, mid, reply_markup=None)
                 elif data =='back':
                     if user_step[cid]== 2210 :
                         user_step[cid] = 2200 
@@ -795,19 +835,55 @@ def call_back_handler(call):
                         user_step[cid]= 2000
                     bot.edit_message_reply_markup(cid, mid, reply_markup=None)    
                     bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_step[cid]))  
-            elif data.startswith('add'):
-                data=data.split('=')[-1]                       
-                if data == 'add' :
-                    pass
+            # elif data.startswith('add'):
+            #     data=data.split('=')[-1]                       
+            #     if data == 'add' :
+            #         pass
             elif data.startswith('edit'):
                 data=data.split('=')[-1]    
                 if data == 'edit' :
-                    pass
+                    mid_cid.update({cid:mid})
+                    if user_step[cid]== 2200 :
+                          user_step[cid] = 2220 
+                    if user_step[cid]== 3200 :
+                        user_step[cid] = 3220
+                    make_edit_adminaccount_inline(cid=cid,mid=mid)      
+                elif data =='name':
+                    if user_step[cid]== 2220 :
+                        user_step[cid] = 2221 
+                    if user_step[cid]== 3220 :
+                        user_step[cid] = 3221                     
+                    bot.edit_message_text(text['message_name'],cid, mid, reply_markup=None)  
+                elif data =='nationalcode':
+                    if user_step[cid]== 2220 :
+                        user_step[cid] = 2222 
+                    if user_step[cid]== 3220 :
+                        user_step[cid] = 3222                     
+                    bot.edit_message_text(text['message_national_code'],cid, mid, reply_markup=None)
+                elif data =='mobile':
+                    if user_step[cid]== 2220 :
+                        user_step[cid] = 2223 
+                    if user_step[cid]== 3220 :
+                        user_step[cid] = 3223                     
+                    bot.edit_message_text(text['enter_mobile'],cid, mid, reply_markup=None)
+                elif data =='back':
+                    if user_step[cid]== 2220 :
+                        user_step[cid] = 2200 
+                    if user_step[cid]== 3220 :
+                        user_step[cid] = 3200                
+                    make_admin_account_inlinekeyboard(cid , mid)
+                elif data =='cancel':
+                    if user_step[cid] == 3220:
+                        user_step[cid]=3000
+                    if user_step[cid]==2220 :
+                        user_step[cid]= 2000
+                    bot.edit_message_reply_markup(cid, mid, reply_markup=None)    
+                    bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_step[cid]))  
             elif data.startswith('delete'):
                 data=data.split('=')[-1]            
                 if data == 'delete' :
                     pass
-            elif data.startswith('search'):
+            elif data.startswith('back'):
                 data=data.split('=')[-1]            
                 if data == 'back' :
                     if user_step[cid] == 3200:
@@ -1239,30 +1315,82 @@ def message_func(message):
         kala_cid.update({'sale_price': price })
         kala_temp.update({cid:kala_cid})
         edit_kala_func(cid)
-    elif user_step[cid] ==3211 or user_step[cid] ==2211 :
-        fullname=message.text
-        result = search_on_user(fullname=fullname)
-        if len(result) == 0 :
-            bot.send_message(cid,text['not_exist'])
+    elif (user_step[cid] >=3211 and user_step[cid] <=3213 ) or (user_step[cid] >=2211 and user_step[cid] <=2213) :
+        flag =1
+        m=message.text
+        if user_step[cid] ==3211 or user_step[cid] ==2211 :    
+            result = search_on_user(fullname=m)
+        elif user_step[cid] ==3212 or user_step[cid] ==2212:
+            if m.isnumeric() == True:               
+                result = search_on_user(national_code=m)    
+            else :
+                flag = 0    
+        elif user_step[cid] ==3213 or user_step[cid] ==2213:
+            if m.isnumeric() == True:
+                if m.startswith('0') or m.startswith('۰') :
+                    m=m[1:]              
+                    result = search_on_user(mobile_phone=m)    
+            else :
+                flag = 0    
+        if flag ==1 :
+                             
+            if len(result) == 0 :
+                bot.send_message(cid,text['not_exist'])
+            else :
+                for i in result:
+                    id=i['id']
+                    cid= i['cid']
+                    fullname=i['fullname']
+                    username=i['username']
+                    national_code=i['national_code']
+                    mobile_phone=i['mobile_phone']
+                    adress=i['adress']
+                    privilege=i['privilege']
+                    is_block = i['is_block']
+                    user_date=i['user_date']
+                    desciptiom=f'آیدی : {id}\n CID : {cid} \n نام کامل : {fullname} \n نام کاربری تلگرام : {username} \n کد ملی : {national_code} \n شماره موبایل : {mobile_phone} \n  آدرس : {adress}  \n وضیعت : {privilege} \n وضیعت بلاک : {is_block} \n تاریخ ایجاد : {user_date}'
+                    bot.send_message(cid,desciptiom)
+            if user_step[cid] == 2211  or user_step[cid] == 2212 or user_step[cid] == 2213:
+                user_step[cid] = 2210
+            elif user_step[cid] == 3211 or user_step[cid] == 3212 or user_step[cid] == 3213:
+                user_step[cid] = 3210    
+            make_search_inlinemarkup(cid)        
         else :
-            for i in result:
-                id=i['id']
-                cid= i['cid']
-                fullname=i['fullname']
-                username=i['username']
-                national_code=i['national_code']
-                mobile_phone=i['mobile_phone']
-                adress=i['adress']
-                privilege=i['privilege']
-                is_block = i['is_block']
-                user_date=i['user_date']
-                desciptiom=f'آیدی : {id}\n CID : {cid} \n نام کامل : {fullname} \n نام کاربری تلگرام : {username} \n کد ملی : {national_code} \n شماره موبایل : {mobile_phone} \n  آدرس : {adress}  \n وضیعت : {privilege} \n وضیعت بلاک : {is_block} \n تاریخ ایجاد : {user_date}'
-                bot.send_message(cid,desciptiom)
-        if user_step[cid] == 2211 :
-            user_step[cid] = 2210
-        elif user_step[cid] == 3211 :
-            user_step[cid] = 3210    
-        make_search_inlinemarkup(cid)        
-    
+            bot.send_message(cid,text['enter_corect'])
+            
+    elif (user_step[cid] >=3221 and user_step[cid] <=3223 ) or (user_step[cid] >=2221 and user_step[cid] <=2223) :
+        flag =1
+        m=message.text
+        if user_step[cid] ==3221 or user_step[cid] ==2221 :    
+            result = search_on_user(fullname=m)
+        elif user_step[cid] ==3222 or user_step[cid] ==2222:
+            if m.isnumeric() == True:               
+                result = search_on_user(national_code=m)    
+            else :
+                flag = 0    
+        elif user_step[cid] ==3223 or user_step[cid] ==2223:
+            if m.isnumeric() == True:
+                if m.startswith('0') or m.startswith('۰') :
+                    m=m[1:]              
+                    result = search_on_user(mobile_phone=m)    
+            else :
+                flag = 0    
+        if flag ==1 :
+                             
+            if len(result) == 0 :
+                if user_step[cid] == 2221  or user_step[cid] == 2222 or user_step[cid] == 2223:
+                    user_step[cid] = 2210
+                elif user_step[cid] == 3211 or user_step[cid] == 3212 or user_step[cid] == 3213:
+                    user_step[cid] = 3210                   
+                bot.send_message(cid,text['not_exist'])
+                make_edit_adminaccount_inline(cid=cid)
+            else :
+                if user_step[cid] == 2221  or user_step[cid] == 2222 or user_step[cid] == 2223:
+                    user_step[cid] = 2214
+                elif user_step[cid] == 3221 or user_step[cid] == 3222 or user_step[cid] == 3223:
+                    user_step[cid] = 3214   
+                make_edit_adminaccount_inline(cid=cid,result=result)
+        else :
+            bot.send_message(cid,text['enter_corect'])            
     
 bot.infinity_polling()
