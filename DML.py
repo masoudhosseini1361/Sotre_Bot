@@ -30,6 +30,19 @@ def update_user(cid , fullname , mobile_phone , national_code , adress ):
     cursor.close()
     conn.close()
 
+def update_condition_user(cid,privilege =None ,is_block =None) :
+    conn=mysql.connector.connect(**db_config)
+    cursor=conn.cursor() 
+    if  privilege != None : 
+        SQL_QURY="""UPDATE user SET   privilege=%s WHERE cid=%s """
+        cursor.execute(SQL_QURY,( privilege,cid ))
+    elif is_block != None : 
+        SQL_QURY="""UPDATE user SET   is_block=%s WHERE cid=%s """
+        cursor.execute(SQL_QURY,(is_block,cid ))  
+    conn.commit()
+    cursor.close()
+    conn.close()
+
 #All function for category table
 
 def insert_category(name_category ,show_category ):
