@@ -129,8 +129,10 @@ def get_info_salrow_where_kala_id(kala_id):
 
 if __name__ == "__main__":
     pass
-
-    # print(result=search_condition_on_user(cid=6944720842))
+    # result =search_condition_on_user(cid=6944720842)
+    # result=result[0]
+    # print(result)
+    # print(search_condition_on_user(cid=6944720842))
     # print(search_on_user(fullname='مسعود حسینی'))
     # print(search_on_user(mobile_phone='522'))
     # print(search_on_user(national_code='239'))
