@@ -19,9 +19,10 @@ def create_table_user():
         national_code   CHAR(10),
         mobile_phone    VARCHAR(15),
         adress          VARCHAR(200),
+        user_date       VARCHAR(10) ,
         privilege       ENUM('USER','ADMIN') DEFAULT 'USER',
         is_block        ENUM('NO','YES') DEFAULT 'NO',
-        user_date       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP     
+             
     )                   
     """
     cursor.execute(SQL_QURY)

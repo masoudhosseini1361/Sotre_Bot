@@ -63,6 +63,17 @@ def get_info_category() :
     conn.close()
     return result
 
+
+def condition_category( name_category ):
+    conn=mysql.connector.connect(**db_config)
+    cursor=conn.cursor(dictionary=True)
+    SQL_QURY="""SELECT show_category FROM category  where  name_category = %s"""
+    cursor.execute(SQL_QURY,(name_category,))
+    result=cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return result
+
 #All Function for kala table
 
 def get_info_kala() :
@@ -129,6 +140,7 @@ def get_info_salrow_where_kala_id(kala_id):
 
 if __name__ == "__main__":
     pass
+    # print(condition_category( name_category='تی شرت' ))
     # result =search_condition_on_user(cid=6944720842)
     # result=result[0]
     # print(result)

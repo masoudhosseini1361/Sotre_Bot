@@ -148,6 +148,10 @@ def date_today():
     today=today.strftime("%Y/%m/%d")
     return today
 
+
+
+#make function group kala
+
 def make_inlinekeyboardMarkup_category(cid=None ,mid=None):
         markup=InlineKeyboardMarkup() 
         for i in category.keys():
@@ -168,8 +172,7 @@ def inline_add_group(cid , mid):
             user_step[cid] = 3110 
     markup=InlineKeyboardMarkup()
     markup.add(InlineKeyboardButton(category_temp[cid][0],callback_data='group_add/namecategory'))
-    markup.add(InlineKeyboardButton(button['register'],callback_data='group_add/sabt'))
-    markup.add(InlineKeyboardButton(button['cancel'],callback_data='group_add/cancel'))
+    markup.add(InlineKeyboardButton(button['register'],callback_data='group_add/sabt'),InlineKeyboardButton(button['cancel'],callback_data='group_add/cancel'))
     bot.edit_message_text(text['add_name_group'],cid,mid,reply_markup=markup)
     return
 
@@ -180,27 +183,45 @@ def inline_edit_group(cid , mid):
             user_step[cid] = 2110
         else :
             user_step[cid] = 3110 
+    group_condition =text['group_condition']
+    result=condition_category( name_category=category_oldname[cid] )
+    show_category=result[0]['show_category']        
     markup=InlineKeyboardMarkup()
     markup.add(InlineKeyboardButton(category_oldname[cid],callback_data='group_edit/namecategory'))
+    markup.add(InlineKeyboardButton(f'{group_condition} : {show_category}',callback_data=f'group_edit/showcategory={show_category}'))
     markup.add(InlineKeyboardButton(button['edit'],callback_data=f'group_edit/edit-{category_oldname[cid]}'))
     markup.add(InlineKeyboardButton(button['delete_group'],callback_data=f'group_edit/delete-{category_oldname[cid]}'))
     markup.add(InlineKeyboardButton(button['back'],callback_data=f'group_edit/back-{category_oldname[cid]}'))
     bot.edit_message_text(text['edit_name_group'],cid,mid,reply_markup=markup)
     return
 
-def inline_change_group(cid , mid):
+def inline_change_group(cid , mid,condition=None):
     if user_step[cid] ==2100 or user_step[cid] ==3100:
         if user_step[cid] == 2100 :
             user_step[cid] = 2110
         else :
             user_step[cid] = 3110 
     markup=InlineKeyboardMarkup()
-    markup.add(InlineKeyboardButton(category_temp[cid][0],callback_data='group_edit/change-newname'))
-    markup.add(InlineKeyboardButton(button['register'],callback_data='group_edit/sabt-newname'))
-    markup.add(InlineKeyboardButton(button['cancel'],callback_data='group_edit/cancel-newname'))
-    bot.edit_message_text(text['change_name_group'],cid,mid,reply_markup=markup)
+    if condition != None :
+        
+        if condition=='YES' :
+            condition='NO'
+        elif condition == 'NO':
+            condition = 'YES'
+        group_condition= text['group_condition']    
+        markup.add(InlineKeyboardButton(f'{group_condition} : {condition}',callback_data=f'group_edit/showcategory={condition}'))
+        markup.add(InlineKeyboardButton(button['register'],callback_data=f'group_edit/showcategory=sabt-{condition}'),InlineKeyboardButton(button['cancel'],callback_data='group_edit/cancel-condition={condition}'))
+        bot.edit_message_text(text['register'],cid,mid,reply_markup=markup)
+    
+    
+    else :        
+        markup.add(InlineKeyboardButton(category_temp[cid][0],callback_data='group_edit/change-newname'))
+        markup.add(InlineKeyboardButton(button['register'],callback_data='group_edit/sabt-newname'),InlineKeyboardButton(button['cancel'],callback_data='group_edit/cancel-newname'))
+        bot.edit_message_text(text['change_name_group'],cid,mid,reply_markup=markup)
     return
 
+
+#make fuction kala 
 
 def make_inlinekeyboardMarkup_kala(cid=None ,mid=None):
         markup=InlineKeyboardMarkup() 
@@ -230,13 +251,16 @@ def show_inlinekeyboardMarkup_category(cid=None ,mid=None):
             markup.add(InlineKeyboardButton(button['back'],callback_data='kala_delete/back'),InlineKeyboardButton(button['cancel'],callback_data='kala_delete/cancel'))
         bot.edit_message_text(text['choice_group'],cid,mid,reply_markup=markup)
 
+
+
+
+#make fuction admin account
+
 def make_admin_account_inlinekeyboard(cid , mid=None) :
     markup =InlineKeyboardMarkup()
     if user_step[cid] == 2200 or user_step[cid] == 3200:
         markup.add(InlineKeyboardButton(button['search'],callback_data=f'adminaccount/search=search'))
-    #    markup.add(InlineKeyboardButton(button['add_account'],callback_data=f'adminaccount/add=add'))
         markup.add(InlineKeyboardButton(button['edit_account'],callback_data=f'adminaccount/edit=edit'))
-    #    markup.add(InlineKeyboardButton(button['delete_account'],callback_data=f'adminaccount/delete=delete'))
         markup.add(InlineKeyboardButton(button['back'],callback_data=f'adminaccount/back=back'))
     if mid ==None :
         bot.send_message(cid,text['select_menu'],reply_markup=markup)  
@@ -578,30 +602,51 @@ def call_back_handler(call):
                 data= data.split('/')[-1]
                # print(data,'in')
                 if data in category.keys():
-                    result =get_infokala_where_category(data)
-                    if len(result)== 0:
-                        category_temp.update({cid:[data,mid]})
-                        category_oldname.update({cid:data})
-                        # print(data,'2')
-                        inline_edit_group(cid , mid)
-                    else :
-                        markup=InlineKeyboardMarkup()
-                        bot.answer_callback_query(call_id, text['no_delete_group'],show_alert=True,cache_time=3)
+                    category_temp.update({cid:[data,mid]})
+                    category_oldname.update({cid:data})
+                    inline_edit_group(cid , mid)
+                elif data.startswith('showcategory') :
+                    data = data.split('=')[-1]
+                    if data == 'YES' or data == 'NO' :    
+                        inline_change_group(cid , mid,condition=data)                                          
+                    elif data.startswith('sabt') :   
+                        data = data.split('-')[-1]
+                        print(data) 
+                        if user_step[cid] ==2110 :
+                            user_step[cid] =2100
+                        else :
+                            user_step[cid]=3100  
+                        update_show_category(name_category=category_oldname[cid],show_category=data)
+                        bot.answer_callback_query(call_id, text['sabt'],show_alert=True)
+                        bot.edit_message_reply_markup(cid, mid, reply_markup=None)          
+                        category.update({category_oldname[cid]:data})
+                        category_temp.pop(cid)
+                        category_oldname.pop(cid)
                 elif data.split('-')[0] =='edit' :
                     data= data.split('-')[0]
-                    inline_change_group(cid , mid)   
+                    result =get_infokala_where_category(category_oldname[cid])
+                    if len(result)== 0:
+                        inline_change_group(cid , mid)
+                    else :
+                        markup=InlineKeyboardMarkup()
+                        bot.answer_callback_query(call_id, text['no_delete_group'],show_alert=True,cache_time=3)                    
                 elif data.split('-')[0] =='delete' :
                     if user_step[cid] ==2110 :
                         user_step[cid] =2100
                     else :
                         user_step[cid]=3100                    
                     data= data.split('-')[0]
-                    # print (category_oldname[cid])
-                    delete_category(name_category=category_oldname[cid])
-                    category.pop(category_oldname[cid])
-                    category_temp.pop(cid)
-                    category_oldname.pop(cid)
-                    bot.edit_message_reply_markup(cid, mid, reply_markup=None)
+                    result =get_infokala_where_category(category_oldname[cid])
+                    if len(result)== 0:
+                        delete_category(name_category=category_oldname[cid])
+                        category.pop(category_oldname[cid])
+                        category_temp.pop(cid)
+                        category_oldname.pop(cid)
+                        bot.edit_message_reply_markup(cid, mid, reply_markup=None)
+                    else :
+                        markup=InlineKeyboardMarkup()
+                        bot.answer_callback_query(call_id, text['no_delete_group'],show_alert=True,cache_time=3)                    
+
                 elif data.split('-')[0] =='change' :
                     if user_step[cid] ==2110 :
                         user_step[cid] =2111
@@ -830,8 +875,7 @@ def call_back_handler(call):
                             user_step[cid]=3100                        
                         bot.edit_message_reply_markup(cid, mid, reply_markup=None)                                                    
                 elif data=='back':
-                    # if cid in kala_temp.keys():
-                    #     kala_temp.pop(cid)
+
                     if user_step[cid]==3123 :
                         user_step[cid]= 3120
                     if user_step[cid]==2123 :
@@ -900,10 +944,7 @@ def call_back_handler(call):
                         user_step[cid]= 2000
                     bot.edit_message_reply_markup(cid, mid, reply_markup=None)    
                     bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_step[cid]))  
-            # elif data.startswith('add'):
-            #     data=data.split('=')[-1]                       
-            #     if data == 'add' :
-            #         pass
+
             elif data.startswith('edit'):
                 data=data.split('=')[-1]    
                 if data == 'edit' :
@@ -941,13 +982,11 @@ def call_back_handler(call):
                     make_edit_adminaccount_inline(cid=cid,mid=mid,cid_user_priv=data)
                 elif data.startswith('privilege') :
                     data=data.split('-')[-1]
-                    print(data)
                     if user_step[cid] ==3224.1 :
                         user_step[cid] =3224.2
                         make_edit_adminaccount_inline(cid ,mid=None,sabt=data)
                 elif data.startswith('is_block') :
                     data=data.split('-')[-1]
-                    print(data)
                     if user_step[cid] ==3224.1  :
                         user_step[cid] =3224.2
                         make_edit_adminaccount_inline(cid ,mid=None,sabt=data)
@@ -957,30 +996,23 @@ def call_back_handler(call):
                 elif data.startswith('sabt') :
                     data=data.split('-')[-1]
                     cid_user_=cid_user[cid]
-                    print(cid_user_)
                     if data == 'ADMIN' :
                         user_cid.remove( cid_user_)
                         admin.append(cid_user_)
                         update_condition_user(cid=cid_user_,privilege = data)
                         bot.send_message(cid_user_,text['admin_condition'])
-                        print(mid_cid)
-                        print(cid_user)
                         mid_cid.pop(cid)
                         cid_user.pop(cid)
                         user_step[cid_user_]=2000
-                        print(call_id)
                         bot.answer_callback_query(call_id, text['sabt'],show_alert=True)
                     elif data == 'USER' :
                         user_cid.append( cid_user_)
                         admin.remove(cid_user_)
                         update_condition_user(cid=cid_user_,privilege = data)
                         bot.send_message(cid_user_,text['user_condition1'])
-                        print(mid_cid)
-                        print(cid_user)
                         mid_cid.pop(cid)
                         cid_user.pop(cid)
                         user_step[cid_user_]=1000
-                        print(call_id)
                         bot.answer_callback_query(call_id, text['sabt'],show_alert=True)    
 
                     elif data == 'YES' :
@@ -1038,10 +1070,7 @@ def call_back_handler(call):
                         cid_user.pop(cid)    
                     bot.edit_message_reply_markup(cid, mid, reply_markup=None)    
                     bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_step[cid]))  
-            # elif data.startswith('delete'):
-            #     data=data.split('=')[-1]            
-            #     if data == 'delete' :
-            #         pass
+
             elif data.startswith('back'):
                 data=data.split('=')[-1]            
                 if data == 'back' :
@@ -1087,7 +1116,8 @@ def command_start(message):
             if cid in block_user : return
             if cid in user_cid : return
             username = message.chat.username
-            insert_user(cid=cid ,username=username)
+            today=date_today()
+            insert_user(cid=cid ,username=username,user_date=today)
             user_cid.append(cid)
             user_profile.update({cid:[None,None,None,username,None]})          
 
@@ -1488,7 +1518,7 @@ def message_func(message):
             if m.isnumeric() == True:
                 if m.startswith('0') or m.startswith('۰') :
                     m=m[1:]              
-                    result = search_on_user(mobile_phone=m)    
+                result = search_on_user(mobile_phone=m)    
             else :
                 flag = 0    
         if flag ==1 :
@@ -1531,7 +1561,7 @@ def message_func(message):
             if m.isnumeric() == True:
                 if m.startswith('0') or m.startswith('۰') :
                     m=m[1:]              
-                    result = search_on_user(mobile_phone=m)    
+                result = search_on_user(mobile_phone=m)    
             else :
                 flag = 0    
         if flag ==1 :

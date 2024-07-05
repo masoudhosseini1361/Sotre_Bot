@@ -8,13 +8,13 @@ from Config import *
 #All Function for user table
 
 
-def insert_user(cid , fullname= None , mobile_phone = None , national_code=None , adress= None ,username=None):
+def insert_user(cid ,user_date ,fullname= None , mobile_phone = None , national_code=None , adress= None ,username=None):
     conn=mysql.connector.connect(**db_config)
     cursor=conn.cursor()
-    SQL_QURY="""INSERT IGNORE INTO user(cid , fullname, username , national_code, mobile_phone  , adress )
-                VALUE(%s,%s,%s,%s,%s,%s)
+    SQL_QURY="""INSERT IGNORE INTO user(cid , user_date,fullname, username , national_code, mobile_phone  , adress )
+                VALUE(%s,%s,%s,%s,%s,%s,%s)
     """
-    cursor.execute(SQL_QURY,(cid , fullname, username , national_code, mobile_phone  , adress))
+    cursor.execute(SQL_QURY,(cid , user_date,fullname, username , national_code, mobile_phone  , adress))
     conn.commit()
     cursor.close()
     conn.close()
@@ -75,6 +75,18 @@ def delete_category(name_category):
     cursor.close()
     conn.close()
 
+def update_show_category(name_category,show_category) :
+    conn=mysql.connector.connect(**db_config)
+    cursor=conn.cursor()
+    SQL_QURY="""UPDATE category SET show_category=%s WHERE name_category=%s"""
+    cursor.execute(SQL_QURY,(show_category ,name_category ))
+    conn.commit()
+    cursor.close()
+    conn.close()
+ 
+
+# All Function  For Kala  Table
+
 #    id             INT AUTO_INCREMENT NOT NULL,
 #         kalaname       VARCHAR(50),
 #         buy_price      DOUBLE,
@@ -90,7 +102,7 @@ def delete_category(name_category):
 
 
 
-# All Function  For Kala  Table
+
 
 
 def insert_kala( kalaname,name_category ,kala_date,image_file_id,sale_price=0 , buy_price = 0 , count=0,m_size=0,l_size=0,xl_size=0,xxl_size=0):
@@ -126,11 +138,13 @@ def delete_kala(id):
 
 if __name__ == "__main__":
     pass
+    # update_show_category(name_category='تی شرت',show_category='NO')
+    # update_show_category(name_category='تی شرت',show_category='YES')
     # delete_kala(id=8)
-   #insert_user(cid=342165313,step=1000 ,username='masoud216')
-   #update_user(cid=87889742,fullname='masoud hosseini',national_code='0075239000',mobile_phone = '09125227989',adress='prozi street')
-   #insert_category(name_category='شلوار',show_category='YES')
-  # update_category(new_name_category='شلور' ,old_name_category='تی شرت' )
-   #delete_category(name_category='شلوار')
-#    insert_kala( kalaname='polo',name_category='تی شرت' ,kala_date='1403/03/27',image_file_id='d:\python\project\image.jpg', buy_price = 0 , sale_price=0 , count=0,m_size=0,l_size=0,xl_size=0,xxl_size=0)
+    #insert_user(cid=342165313,step=1000 ,username='masoud216')
+    #update_user(cid=87889742,fullname='masoud hosseini',national_code='0075239000',mobile_phone = '09125227989',adress='prozi street')
+    #insert_category(name_category='شلوار',show_category='YES')
+    # update_category(new_name_category='شلور' ,old_name_category='تی شرت' )
+    #delete_category(name_category='شلوار')
+    #insert_kala( kalaname='polo',name_category='تی شرت' ,kala_date='1403/03/27',image_file_id='d:\python\project\image.jpg', buy_price = 0 , sale_price=0 , count=0,m_size=0,l_size=0,xl_size=0,xxl_size=0)
     # edit_update_kala(id=2,kalaname='BURBERRY',image_file_id='D:\share\13189.jpg',sale_price=850000)
