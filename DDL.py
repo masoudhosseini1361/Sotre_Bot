@@ -19,10 +19,9 @@ def create_table_user():
         national_code   CHAR(10),
         mobile_phone    VARCHAR(15),
         adress          VARCHAR(200),
-        user_date       VARCHAR(10) ,
         privilege       ENUM('USER','ADMIN') DEFAULT 'USER',
         is_block        ENUM('NO','YES') DEFAULT 'NO',
-             
+        user_date       varchar(10)
     )                   
     """
     cursor.execute(SQL_QURY)
@@ -147,7 +146,7 @@ if __name__ == "__main__" :
 
     # create_database()
     # create_table_user() 
-    create_table_category()
-    create_table_kala()
+    # create_table_category()
+    # create_table_kala()
     # create_sale_invoice_table()
-    create_sale_row_table()
+    # create_sale_row_table()
