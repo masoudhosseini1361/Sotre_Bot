@@ -111,7 +111,7 @@ def create_sale_invoice_table():
     SQL_QURY="""CREATE TABLE IF NOT EXISTS sale_invoice(
         i_number            INT AUTO_INCREMENT NOT NULL ,
         user_id             INT,
-        date_invoice        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        date_invoice        varchar(10),
         PRIMARY KEY(i_number),
         FOREIGN KEY (user_id) REFERENCES user (id)
     )
@@ -138,15 +138,50 @@ def create_sale_row_table():
     conn.close()
     
 
+
+def create_buy_invoice_table():
+    conn=mysql.connector.connect(**db_config)
+    cursor=conn.cursor()
+    SQL_QURY="""CREATE TABLE IF NOT EXISTS buy_invoice(
+        i_number            INT AUTO_INCREMENT NOT NULL ,
+        user_id             INT,
+        date_invoice        varchar(10),
+        PRIMARY KEY(i_number),
+        FOREIGN KEY (user_id) REFERENCES user (id)
+    )
+    """   
+    cursor.execute(SQL_QURY)
+    cursor.close()
+    conn.close()
+    
+def create_buy_row_table():
+    conn=mysql.connector.connect(**db_config)
+    cursor=conn.cursor()
+    SQL_QURY="""CREATE TABLE IF NOT EXISTS buy_row(
+        i_number            INT ,
+        kala_id             INT,
+        kala_price          INT,
+        count               SMALLINT(255),
+        total_row           INT,
+        FOREIGN KEY (i_number) REFERENCES sale_invoice(i_number),
+        FOREIGN KEY (kala_id) REFERENCES kala (id)
+    )
+    """   
+    cursor.execute(SQL_QURY)
+    cursor.close()
+    conn.close()
+    
+
+
+
         
     
 if __name__ == "__main__" :
-    pass
-
-
-    # create_database()
-    # create_table_user() 
-    # create_table_category()
-    # create_table_kala()
-    # create_sale_invoice_table()
-    # create_sale_row_table()
+    create_database()
+    create_table_user() 
+    create_table_category()
+    create_table_kala()
+    create_sale_invoice_table()
+    create_sale_row_table()
+    create_buy_invoice_table()
+    create_buy_row_table()

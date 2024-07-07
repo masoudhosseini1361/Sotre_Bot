@@ -14,12 +14,6 @@ from TEXT import *
 
 
 logging.basicConfig(filename=logfile, filemode='a', level=logging.INFO, format= f'%(asctime)s - %(levelname)s - %(message)s')
-create_database()
-create_table_user() 
-create_table_category()
-create_table_kala()
-create_sale_invoice_table()
-create_sale_row_table()
 
 API_TOKEN =bottoken
 
@@ -87,6 +81,8 @@ button= {
         'kala' :                'کالا  📦',
         'admin_account':        'طرف حساب  👤',
         'invoice' :             'فاکتور  🧾',
+        'buy_invoice':          'فاکتور خرید',
+        'sale_invoice':         'فاکتور فروش',
         'admin' :               'ادمین  👨🏻‍💻',
         'finacial_department' : 'امور مالی  💰',
         'reports' :             'گزارشات  📊',
@@ -252,177 +248,6 @@ def show_inlinekeyboardMarkup_category(cid=None ,mid=None):
         bot.edit_message_text(text['choice_group'],cid,mid,reply_markup=markup)
 
 
-
-
-#make fuction admin account
-
-def make_admin_account_inlinekeyboard(cid , mid=None) :
-    markup =InlineKeyboardMarkup()
-    if user_step[cid] == 2200 or user_step[cid] == 3200:
-        markup.add(InlineKeyboardButton(button['search'],callback_data=f'adminaccount/search=search'))
-        markup.add(InlineKeyboardButton(button['edit_account'],callback_data=f'adminaccount/edit=edit'))
-        markup.add(InlineKeyboardButton(button['back'],callback_data=f'adminaccount/back=back'))
-    if mid ==None :
-        bot.send_message(cid,text['select_menu'],reply_markup=markup)  
-    else :
-        bot.edit_message_text(text['select_menu'],cid,mid,reply_markup=markup)
-        
-def make_search_inlinemarkup(cid, mid=None) :
-    markup=InlineKeyboardMarkup()
-    markup.add(InlineKeyboardButton(button['search_name'],callback_data=f'adminaccount/search=name'))    
-    markup.add(InlineKeyboardButton(button['search_nationalcode'],callback_data=f'adminaccount/search=nationalcode'))    
-    markup.add(InlineKeyboardButton(button['search_mobile'],callback_data=f'adminaccount/search=mobile'))    
-    markup.add(InlineKeyboardButton(button['back'],callback_data=f'adminaccount/search=back'),InlineKeyboardButton(button['cancel'],callback_data=f'adminaccount/search=cancel'))
-    if mid == None :
-        bot.send_message(cid,text['search_account'],reply_markup=markup)
-    else :    
-        bot.edit_message_text(text['search_account'],cid,mid,reply_markup=markup)
-
-
-
-def make_edit_adminaccount_inline(cid ,mid=None,result=None,cid_user_priv=None ,sabt=None) :
-    markup=InlineKeyboardMarkup()
-    if mid == None :
-        mid=mid_cid[cid]
-    if result ==None and (user_step[cid] == 3220 or user_step[cid]==2220):    
-        markup.add(InlineKeyboardButton(button['search_name'],callback_data=f'adminaccount/edit=name'))    
-        markup.add(InlineKeyboardButton(button['search_nationalcode'],callback_data=f'adminaccount/edit=nationalcode'))    
-        markup.add(InlineKeyboardButton(button['search_mobile'],callback_data=f'adminaccount/edit=mobile'))    
-        markup.add(InlineKeyboardButton(button['back'],callback_data=f'adminaccount/edit=back'),InlineKeyboardButton(button['cancel'],callback_data=f'adminaccount/edit=cancel'))   
-        bot.edit_message_text(text['search_account'],cid,mid,reply_markup=markup)
-    elif user_step[cid] == 3224 or user_step[cid]==2224 :
-        for i in result:
-            id=i['id']
-            cid_user_= i['cid']
-            fullname=i['fullname']
-            username=i['username']
-            national_code=i['national_code']
-            mobile_phone=i['mobile_phone']
-            adress=i['adress']
-            privilege=i['privilege']
-            is_block = i['is_block']
-            user_date=i['user_date']
-            markup.add(InlineKeyboardButton(f'نام : {fullname}--کد ملی :{national_code} --موبایل : {mobile_phone}',callback_data=f'adminaccount/edit={cid_user_}'))  
-        markup.add(InlineKeyboardButton(button['back'],callback_data=f'adminaccount/edit=back'),InlineKeyboardButton(button['cancel'],callback_data=f'adminaccount/edit=cancel'))    
-        bot.edit_message_text(text['select_switch'],cid,mid,reply_markup=markup)      
-    
-    elif user_step[cid] ==3224.1 :
-        
-        result =search_condition_on_user(cid=cid_user_priv)   
-        print(result)
-        result=result[0]
-        fullname=result['fullname']
-        privilege=result['privilege']
-        if privilege =='USER' :
-           n_privilege ='ADMIN'
-        else : 
-            n_privilege ='USER'
-                
-        is_block=result['is_block']
-        if is_block == 'YES' :
-            n_is_block= 'NO'
-        else :
-            n_is_block ='YES' 
-        block_condition=text['block_condition']
-        user_condition =text['user_condition']
-        markup.add(InlineKeyboardButton(f'{fullname}',callback_data=f'adminaccount/edit=none'))  
-        markup.add(InlineKeyboardButton(f'{user_condition} : {privilege} ',callback_data=f'adminaccount/edit=privilege-{n_privilege}'))
-        markup.add(InlineKeyboardButton(f'{block_condition}  : {is_block}',callback_data=f'adminaccount/edit=is_block-{n_is_block}')) 
-        markup.add(InlineKeyboardButton(button['cancel'],callback_data=f'adminaccount/edit=cancel'))
-        bot.edit_message_text(text['change_condition'],cid,mid,reply_markup=markup) 
-    
-    elif user_step[cid] ==2224.1  :       
-        result =search_condition_on_user(cid=cid_user_priv)
-        fullname=result[0]['fullname']
-        is_block=result[0]['is_block']
-        if is_block == 'YES' :
-            n_is_block= 'NO'
-        else :
-            n_is_block ='YES'
-        block_condition=text['block_condition']
-        user_condition =text['user_condition']
-        markup.add(InlineKeyboardButton(f'{fullname}',callback_data=f'adminaccount/edit=none'))  
-        markup.add(InlineKeyboardButton(f'{block_condition}  : {is_block}',callback_data=f'adminaccount/edit=is_block-{n_is_block}')) 
-        markup.add(InlineKeyboardButton(button['cancel'],callback_data=f'adminaccount/edit=cancel'))
-        bot.edit_message_text(text['change_condition'],cid,mid,reply_markup=markup) 
-    
-    elif user_step[cid] ==3224.2 :
-        block_condition=text['block_condition']
-        user_condition =text['user_condition']
-        if sabt =='USER' :
-            markup.add(InlineKeyboardButton(f'{user_condition}  : {sabt}',callback_data=f'adminaccount/edit=none'))         
-        elif sabt =='ADMIN' :
-            markup.add(InlineKeyboardButton(f'{user_condition}  : {sabt}',callback_data=f'adminaccount/edit=none'))
-        elif sabt =='YES' :
-            markup.add(InlineKeyboardButton(f'{block_condition} : {sabt}',callback_data=f'adminaccount/edit=none'))
-        elif sabt =='NO' :
-            markup.add(InlineKeyboardButton(f'{block_condition} : {sabt}' ,callback_data=f'adminaccount/edit=none'))        
-        markup.add(InlineKeyboardButton(button['register'],callback_data=f'adminaccount/edit=sabt-{sabt}'),InlineKeyboardButton(button['cancel'],callback_data=f'adminaccount/edit=cancel'))    
-        bot.edit_message_text(text['register'],cid,mid,reply_markup=markup)
-    elif user_step[cid] ==2224.2 :
-        block_condition=text['block_condition']
-        if sabt =='YES' :
-            markup.add(InlineKeyboardButton(f'{block_condition}: {sabt}',callback_data=f'adminaccount/edit=none'))
-        elif sabt =='NO' :
-            markup.add(InlineKeyboardButton(f'{block_condition} : {sabt}',callback_data=f'adminaccount/edit=none'))        
-        markup.add(InlineKeyboardButton(button['register'],callback_data=f'adminaccount/edit=sabt-{sabt}'),InlineKeyboardButton(button['cancel'],callback_data=f'adminaccount/edit=cancel'))    
-        bot.edit_message_text(text['register'],cid,mid,reply_markup=markup)
-    
-    
-
-
-    
-# make ReplyKeyboardMarkup
-
-
-#define the main  menu
-
-def make_ReplyKeyboardMarkup(user_s=None):
-    markup=ReplyKeyboardMarkup(resize_keyboard=True)
-    if user_s >=3000 :
-        if user_s  == 3000 :
-            # main menu of manager
-            markup.add(button['invoice'],button['admin_account'],button['kala'])
-            markup.add(button['reports'],button['finacial_department'],button['admin'])
-            return(markup)
-        elif user_s ==3100 :
-            # kala menu on manger
-            markup.add(button['kala'],button['group'])
-            markup.add(button['home'])
-            return(markup)
-        elif user_s == 3200 :
-            # account menu on manger
-            markup.add(button['home'])
-            return(markup)
-        
-    elif user_s >=2000  and user_s < 3000 :
-        if user_s == 2000 :
-            # main  menu of admin
-            markup.add(button['invoice'],button['admin_account'],button['kala'])
-            markup.add(button['reports'],button['finacial_department'])
-            return(markup)
-        elif user_s ==2100 :
-            # kala menu on admin
-            markup.add(button['kala'],button['group'])
-            markup.add(button['home'])
-            return(markup)
-        elif user_s == 3200 :
-            # account menu on admin
-            markup.add(button['home'])
-            return(markup)        
-        
-    elif user_s >= 1000 and user_s <2000 :
-        if user_s == 1000:
-            # main menu on user
-    
-            markup.add(button['user_account'],button['buy'])
-            markup.add(button['contact_to_me'],button['help'])
-            return(markup)
-        
-        
-
-
-
 #kala_temp ={cid={kalaname :name ,category:category,image_file_id :file_id ,sale_price:price,}}
 def  insert_kala_func(cid , mid = None ) :
     kala_cid=kala_temp[cid]
@@ -550,6 +375,223 @@ def delete_kala_func(cid ,mid=None,id=None,call_id=None):
             markup.add(InlineKeyboardButton(description,callback_data= f'kala_delete/id={kala_id}'))
        markup.add(InlineKeyboardButton(button['back'],callback_data= f'kala_delete/id=back'),InlineKeyboardButton(button['cancel'],callback_data= f'kala_delete/id=cancel'))
        bot.edit_message_text(text['delete_kala'],cid,mid,reply_markup=markup)     
+
+
+
+
+#make fuction admin account
+
+def make_admin_account_inlinekeyboard(cid , mid=None) :
+    markup =InlineKeyboardMarkup()
+    if user_step[cid] == 2200 or user_step[cid] == 3200:
+        markup.add(InlineKeyboardButton(button['search'],callback_data=f'adminaccount/search=search'))
+        markup.add(InlineKeyboardButton(button['edit_account'],callback_data=f'adminaccount/edit=edit'))
+        markup.add(InlineKeyboardButton(button['back'],callback_data=f'adminaccount/back=back'))
+    if mid ==None :
+        bot.send_message(cid,text['select_menu'],reply_markup=markup)  
+    else :
+        bot.edit_message_text(text['select_menu'],cid,mid,reply_markup=markup)
+        
+def make_search_inlinemarkup(cid, mid=None) :
+    markup=InlineKeyboardMarkup()
+    markup.add(InlineKeyboardButton(button['search_name'],callback_data=f'adminaccount/search=name'))    
+    markup.add(InlineKeyboardButton(button['search_nationalcode'],callback_data=f'adminaccount/search=nationalcode'))    
+    markup.add(InlineKeyboardButton(button['search_mobile'],callback_data=f'adminaccount/search=mobile'))    
+    markup.add(InlineKeyboardButton(button['back'],callback_data=f'adminaccount/search=back'),InlineKeyboardButton(button['cancel'],callback_data=f'adminaccount/search=cancel'))
+    if mid == None :
+        bot.send_message(cid,text['search_account'],reply_markup=markup)
+    else :    
+        bot.edit_message_text(text['search_account'],cid,mid,reply_markup=markup)
+
+
+
+def make_edit_adminaccount_inline(cid ,mid=None,result=None,cid_user_priv=None ,sabt=None) :
+    markup=InlineKeyboardMarkup()
+    if mid == None :
+        mid=mid_cid[cid]
+    if result ==None and (user_step[cid] == 3220 or user_step[cid]==2220):    
+        markup.add(InlineKeyboardButton(button['search_name'],callback_data=f'adminaccount/edit=name'))    
+        markup.add(InlineKeyboardButton(button['search_nationalcode'],callback_data=f'adminaccount/edit=nationalcode'))    
+        markup.add(InlineKeyboardButton(button['search_mobile'],callback_data=f'adminaccount/edit=mobile'))    
+        markup.add(InlineKeyboardButton(button['back'],callback_data=f'adminaccount/edit=back'),InlineKeyboardButton(button['cancel'],callback_data=f'adminaccount/edit=cancel'))   
+        bot.edit_message_text(text['search_account'],cid,mid,reply_markup=markup)
+    elif user_step[cid] == 3224 or user_step[cid]==2224 :
+        for i in result:
+            id=i['id']
+            cid_user_= i['cid']
+            fullname=i['fullname']
+            username=i['username']
+            national_code=i['national_code']
+            mobile_phone=i['mobile_phone']
+            adress=i['adress']
+            privilege=i['privilege']
+            is_block = i['is_block']
+            user_date=i['user_date']
+            markup.add(InlineKeyboardButton(f'نام : {fullname}--کد ملی :{national_code} --موبایل : {mobile_phone}',callback_data=f'adminaccount/edit={cid_user_}'))  
+        markup.add(InlineKeyboardButton(button['back'],callback_data=f'adminaccount/edit=back'),InlineKeyboardButton(button['cancel'],callback_data=f'adminaccount/edit=cancel'))    
+        bot.edit_message_text(text['select_switch'],cid,mid,reply_markup=markup)      
+    
+    elif user_step[cid] ==3224.1 :
+        
+        result =search_condition_on_user(cid=cid_user_priv)   
+        print(result)
+        result=result[0]
+        fullname=result['fullname']
+        privilege=result['privilege']
+        if privilege =='USER' :
+           n_privilege ='ADMIN'
+        else : 
+            n_privilege ='USER'
+                
+        is_block=result['is_block']
+        if is_block == 'YES' :
+            n_is_block= 'NO'
+        else :
+            n_is_block ='YES' 
+        block_condition=text['block_condition']
+        user_condition =text['user_condition']
+        markup.add(InlineKeyboardButton(f'{fullname}',callback_data=f'adminaccount/edit=none'))  
+        markup.add(InlineKeyboardButton(f'{user_condition} : {privilege} ',callback_data=f'adminaccount/edit=privilege-{n_privilege}'))
+        markup.add(InlineKeyboardButton(f'{block_condition}  : {is_block}',callback_data=f'adminaccount/edit=is_block-{n_is_block}')) 
+        markup.add(InlineKeyboardButton(button['cancel'],callback_data=f'adminaccount/edit=cancel'))
+        bot.edit_message_text(text['change_condition'],cid,mid,reply_markup=markup) 
+    
+    elif user_step[cid] ==2224.1  :       
+        result =search_condition_on_user(cid=cid_user_priv)
+        fullname=result[0]['fullname']
+        is_block=result[0]['is_block']
+        if is_block == 'YES' :
+            n_is_block= 'NO'
+        else :
+            n_is_block ='YES'
+        block_condition=text['block_condition']
+        user_condition =text['user_condition']
+        markup.add(InlineKeyboardButton(f'{fullname}',callback_data=f'adminaccount/edit=none'))  
+        markup.add(InlineKeyboardButton(f'{block_condition}  : {is_block}',callback_data=f'adminaccount/edit=is_block-{n_is_block}')) 
+        markup.add(InlineKeyboardButton(button['cancel'],callback_data=f'adminaccount/edit=cancel'))
+        bot.edit_message_text(text['change_condition'],cid,mid,reply_markup=markup) 
+    
+    elif user_step[cid] ==3224.2 :
+        block_condition=text['block_condition']
+        user_condition =text['user_condition']
+        if sabt =='USER' :
+            markup.add(InlineKeyboardButton(f'{user_condition}  : {sabt}',callback_data=f'adminaccount/edit=none'))         
+        elif sabt =='ADMIN' :
+            markup.add(InlineKeyboardButton(f'{user_condition}  : {sabt}',callback_data=f'adminaccount/edit=none'))
+        elif sabt =='YES' :
+            markup.add(InlineKeyboardButton(f'{block_condition} : {sabt}',callback_data=f'adminaccount/edit=none'))
+        elif sabt =='NO' :
+            markup.add(InlineKeyboardButton(f'{block_condition} : {sabt}' ,callback_data=f'adminaccount/edit=none'))        
+        markup.add(InlineKeyboardButton(button['register'],callback_data=f'adminaccount/edit=sabt-{sabt}'),InlineKeyboardButton(button['cancel'],callback_data=f'adminaccount/edit=cancel'))    
+        bot.edit_message_text(text['register'],cid,mid,reply_markup=markup)
+    elif user_step[cid] ==2224.2 :
+        block_condition=text['block_condition']
+        if sabt =='YES' :
+            markup.add(InlineKeyboardButton(f'{block_condition}: {sabt}',callback_data=f'adminaccount/edit=none'))
+        elif sabt =='NO' :
+            markup.add(InlineKeyboardButton(f'{block_condition} : {sabt}',callback_data=f'adminaccount/edit=none'))        
+        markup.add(InlineKeyboardButton(button['register'],callback_data=f'adminaccount/edit=sabt-{sabt}'),InlineKeyboardButton(button['cancel'],callback_data=f'adminaccount/edit=cancel'))    
+        bot.edit_message_text(text['register'],cid,mid,reply_markup=markup)
+    
+    
+
+
+
+#make function for buy invoice for admin & manger
+
+def make_buy_invoice_inlinemarkup(cid,mid=None,result=result) :
+    markup=InlineKeyboardMarkup()
+    u_step=user_step[cid]
+    if mid == None :
+        if user_step[cid] ==2310 or user_step[cid]==3310 :
+            markup.add(InlineKeyboardButton(text['name_search'],callback_data='buyinvoice-searchname'))
+            markup.add(InlineKeyboardButton(button['back'],callback_data=f'buyinvoice-back/{u_step}'))
+            bot.send_message(cid,text['name_search1'],reply_markup=markup)
+        elif (user_step[cid] ==2311 or user_step[cid]==3311) and result != None :
+            for i in result :
+                id=i['id']
+                fullname=i['fullname']
+                markup.add(InlineKeyboardButton(fullname,callback_data='buyinvoice-choicename/{id}'))
+            markup.add(InlineKeyboardButton(button['back'],callback_data=f'buyinvoice-back/{u_step}'))
+            bot.send_message(cid,text['choice_name'],reply_markup=markup)
+    else :
+        if user_step[cid] ==2310 or user_step[cid]==3310 :
+            markup.add(InlineKeyboardButton(text['name_search'],callback_data='buyinvoice-searchname'))
+            markup.add(InlineKeyboardButton(button['back'],callback_data=f'buyinvoice-back/{u_step}'))
+            bot.edit_message_text(text['name_search1'],cid,mid,reply_markup=markup)
+
+    
+# make ReplyKeyboardMarkup
+
+
+#define the main  menu
+
+def make_ReplyKeyboardMarkup(user_s=None):
+    markup=ReplyKeyboardMarkup(resize_keyboard=True)
+    if user_s >=3000 :
+        if user_s  == 3000 :
+            # main menu of manager
+            markup.add(button['invoice'],button['admin_account'],button['kala'])
+            markup.add(button['reports'],button['finacial_department'],button['admin'])
+            return(markup)
+            # kala menu on manger
+        elif user_s ==3100 :
+            markup.add(button['kala'],button['group'])
+            markup.add(button['home'])
+            return(markup)
+            # account menu on manger
+        elif user_s == 3200 :
+            markup.add(button['home'])
+            return(markup)
+            # invoice menu on manger
+        elif user_s == 3300 :
+            markup.add(button['sale_invoice'],button['buy_invoice'])
+            markup.add(button['home'])
+            return(markup)
+            #buy invoice menu on admin
+        elif user_s == 3310 :
+            markup.add(button['home'])
+            return(markup)
+        
+        
+        
+        
+    elif user_s >=2000  and user_s < 3000 :
+        if user_s == 2000 :
+            # main  menu of admin
+            markup.add(button['invoice'],button['admin_account'],button['kala'])
+            markup.add(button['reports'],button['finacial_department'])
+            return(markup)
+        elif user_s ==2100 :
+            # kala menu on admin
+            markup.add(button['kala'],button['group'])
+            markup.add(button['home'])
+            return(markup)
+            # account menu on admin
+        elif user_s == 2200 :
+            markup.add(button['home'])
+            return(markup)
+            # invoice menu on admin
+        elif user_s == 2300 :
+            markup.add(button['sale_invoice'],button['buy_invoice'])
+            markup.add(button['home'])
+            return(markup)
+            #buy invoice menu on admin    
+        elif user_s == 2210 :
+            markup.add(button['home'])
+            return(markup)
+        
+    elif user_s >= 1000 and user_s <2000 :
+        if user_s == 1000:
+            # main menu on user
+    
+            markup.add(button['user_account'],button['buy'])
+            markup.add(button['contact_to_me'],button['help'])
+            return(markup)
+        
+        
+
+
 
 
 # Inline QURY HANDLER
@@ -748,7 +790,6 @@ def call_back_handler(call):
                         user_step[cid] =2100
                     elif user_step[cid] ==3121  :
                         user_step[cid]=3100   
-                                        
             elif data.startswith('edit'):
                 data=data.split('/')[-1]        
                 if data=='edit':
@@ -808,7 +849,6 @@ def call_back_handler(call):
                                 user_step[cid]= 2100
                             elif user_step[cid]== 3122 :
                                 user_step[cid] = 3100
-
                         elif data=='back':
                             if cid in kala_temp.keys():
                                 kala_temp.pop(cid)
@@ -842,7 +882,6 @@ def call_back_handler(call):
                         user_step[cid] =2100
                     elif user_step[cid] ==3122  :
                         user_step[cid]=3100                 
-
             elif data.startswith('delete'):
                 data=data.split('/')[-1]
                 if data =='delete':
@@ -875,7 +914,6 @@ def call_back_handler(call):
                             user_step[cid]=3100                        
                         bot.edit_message_reply_markup(cid, mid, reply_markup=None)                                                    
                 elif data=='back':
-
                     if user_step[cid]==3123 :
                         user_step[cid]= 3120
                     if user_step[cid]==2123 :
@@ -889,7 +927,6 @@ def call_back_handler(call):
                     elif user_step[cid] ==3123  :
                         user_step[cid]=3100                        
                     bot.edit_message_reply_markup(cid, mid, reply_markup=None)                       
-                
             elif data.startswith('back'):
                 data=data.split('/')[-1]
                 if data=='back' :
@@ -897,11 +934,9 @@ def call_back_handler(call):
                             user_step[cid]= 2100
                     elif user_step[cid]== 3120 :
                         user_step[cid] = 3100 
-                    bot.edit_message_reply_markup(cid, mid, reply_markup=None) 
-            
+                    bot.edit_message_reply_markup(cid, mid, reply_markup=None)             
         else :  
             bot.edit_message_reply_markup(cid, mid, reply_markup=None)
-    
     elif data.startswith('adminaccount'):
         if (user_step[cid] >=3200 and user_step[cid] <3300 ) or (user_step[cid] >=2200 and user_step[cid] <2300)  :
             data=data.split('/')[-1]
@@ -944,7 +979,6 @@ def call_back_handler(call):
                         user_step[cid]= 2000
                     bot.edit_message_reply_markup(cid, mid, reply_markup=None)    
                     bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_step[cid]))  
-
             elif data.startswith('edit'):
                 data=data.split('=')[-1]    
                 if data == 'edit' :
@@ -1014,7 +1048,6 @@ def call_back_handler(call):
                         cid_user.pop(cid)
                         user_step[cid_user_]=1000
                         bot.answer_callback_query(call_id, text['sabt'],show_alert=True)    
-
                     elif data == 'YES' :
                         block_user.append(cid_user_)
                         user_cid.remove(cid_user_)                        
@@ -1022,7 +1055,6 @@ def call_back_handler(call):
                         mid_cid.pop(cid)
                         cid_user.pop(cid)
                         bot.answer_callback_query(call_id, text['sabt'],show_alert=True,cache_time=3)        
-
                     elif data == 'NO' :
                         user_cid.append(cid_user_)
                         block_user.remove(cid_user_)
@@ -1030,14 +1062,12 @@ def call_back_handler(call):
                         mid_cid.pop(cid)
                         cid_user.pop(cid)
                         bot.answer_callback_query(call_id, text['sabt'],show_alert=True,cache_time=3)
-
                     if user_step[cid] ==3224.2:
                         user_step[cid] =3000
                     if user_step[cid] ==2224.2:
                         user_step[cid] =2000    
                     bot.edit_message_reply_markup(cid, mid, reply_markup=None)    
                     bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_step[cid]))  
-                            
                 elif data =='none': 
                     pass
                 elif data =='back':
@@ -1070,7 +1100,6 @@ def call_back_handler(call):
                         cid_user.pop(cid)    
                     bot.edit_message_reply_markup(cid, mid, reply_markup=None)    
                     bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_step[cid]))  
-
             elif data.startswith('back'):
                 data=data.split('=')[-1]            
                 if data == 'back' :
@@ -1080,10 +1109,35 @@ def call_back_handler(call):
                         user_step[cid]= 2000
                     bot.edit_message_reply_markup(cid, mid, reply_markup=None)    
                     bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_step[cid]))  
-                
         else :
             bot.edit_message_reply_markup(cid, mid, reply_markup=None)
-              
+    elif data.startswith('buyinvoice'):
+        data = data.split('-')[-1]
+        if data =='searchname':
+            mid_cid.update({cid:mid})
+            if data =='2310' :
+                user_step[cid] =2311
+            elif  data =='3310' :
+                user_step[cid] = 3311
+            bot.edit_message_text(text['name_search2'],cid,mid  , reply_markup=None)
+        elif data == 'choice' :
+            mid_cid.update({cid:mid})
+            pass
+        elif data.startswith('back'):
+            data = data.split('-')[-1]
+            if data =='2310' :
+                user_step[cid] =2300
+                bot.edit_message_text(text['select_menu'],cid,mid  , reply_markup=make_ReplyKeyboardMarkup(user_step[cid]))
+            elif  data =='3310' :
+                user_step[cid] = 3300
+                bot.edit_message_text(text['select_menu'],cid,mid  , reply_markup=make_ReplyKeyboardMarkup(user_step[cid]))  
+            elif data ==2311 :
+                user_step[cid]==2310
+                make_buy_invoice_inlinemarkup(cid=cid,mid=mid)
+            elif data ==3311:
+                user_step[cid]==3310
+                make_buy_invoice_inlinemarkup(cid=cid,mid=mid)
+    
     else :
         bot.answer_callback_query(call_id, text['no_data'],cache_time=5)  
         bot.edit_message_reply_markup(cid, mid, reply_markup=None)      
@@ -1114,7 +1168,7 @@ def command_start(message):
         user_s=get_user_step(cid)
         if user_s ==1000 :
             if cid in block_user : return
-            if cid in user_cid : return
+            if cid in user_cid or cid in user_profile.keys() : return
             username = message.chat.username
             today=date_today()
             insert_user(cid=cid ,username=username,user_date=today)
@@ -1144,6 +1198,7 @@ def help_func(message) :
         bot.send_message(cid,text['help'])
 
 #ReplyKeyboardMarkup
+#make buy menu for user
 
 @bot.message_handler(func=lambda message : message.text==button['buy'])
 def button_buy(message) :
@@ -1169,6 +1224,7 @@ def back_func(message) :
         user_step[cid]=1200
         bot.send_message(cid,text['select_switch'],reply_markup=markup)
 
+#make help button for user
 @bot.message_handler(func=lambda message : message.text==button['help'])
 def help_func(message) :
     cid=message.chat.id
@@ -1176,6 +1232,7 @@ def help_func(message) :
     if user_step[cid] <2000 :
         bot.send_message(cid,text['help'])
 
+#make kala menu for admin and manger
 @bot.message_handler(func=lambda message : message.text==button['kala'])
 def kala_func(message) :
     cid=message.chat.id
@@ -1194,7 +1251,7 @@ def kala_func(message) :
             user_step[cid] = 3120
             make_inlinekeyboardMarkup_kala(cid=cid)       
         
-
+#make group menu  for admin and manger
 @bot.message_handler(func=lambda message : message.text==button['group'])
 def group_func(message) :
     cid=message.chat.id       
@@ -1212,7 +1269,7 @@ def group_func(message) :
             user_step[cid] =3100 
         bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_s=user_step[cid]))
     
-# this account for manager adn admin
+# this account  menu for manager and admin
 @bot.message_handler(func=lambda message : message.text==button['admin_account'])
 def admin_account_func(message):
     cid=message.chat.id       
@@ -1226,9 +1283,32 @@ def admin_account_func(message):
     make_admin_account_inlinekeyboard(cid=cid)   
 
 
+#this invoice menu in admin and manager
+@bot.message_handler(func=lambda message : message.text==button['invoice'])
+def invoice_func(message):
+    cid=message.chat.id       
+    if cid in block_user : return
+    if user_step [cid] == 2000:
+        user_step[cid] = 2300
+    if user_step[cid] == 3000 :
+        user_step[cid] = 3300     
+    bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_s=user_step[cid]))
+    
+
+# make buy invoice menu on admin and manager
+@bot.message_handler(func=lambda message : message.text==button['buy_invoice'])
+def buy_invoice_func(message):
+    cid=message.chat.id       
+    if cid in block_user : return
+    if user_step [cid] == 2300:
+        user_step[cid] = 2310
+    if user_step[cid] == 3300 :
+        user_step[cid] = 3310
+    bot.send_message(cid,text['goto_home'],reply_markup=make_ReplyKeyboardMarkup(user_s=user_step[cid]))
+    make_buy_invoice_inlinemarkup(cid)
 
 
-
+# make home button for all 
 @bot.message_handler(func=lambda message : message.text==button['home'])
 def home_func(message):
     cid=message.chat.id
@@ -1243,7 +1323,7 @@ def home_func(message):
     bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_step[cid]))
         
         
-# this account for user       
+# this account menu  for user       
 @bot.message_handler(func=lambda message : message.text==button['user_account'])
 def user_account_func(message) :
     cid=message.chat.id
@@ -1255,6 +1335,7 @@ def user_account_func(message) :
     user_step[cid]=1200
     bot.send_message(cid,text['select_switch'],reply_markup=markup)
 
+# this account menu  for user 
 @bot.message_handler(func=lambda message : message.text==button['user_profile'])
 def user_Profile_func(message):
     cid=message.chat.id
@@ -1267,7 +1348,7 @@ def user_Profile_func(message):
     user_step[cid]=1250
     bot.send_message(cid,text['add_personal'],reply_markup=markup)    
   
- 
+# this account menu  for user  
 @bot.message_handler(func=lambda message : message.text==button['full_name'])
 def full_name_func(message):
     cid=message.chat.id
@@ -1275,6 +1356,7 @@ def full_name_func(message):
     user_step[cid]=1251
     bot.send_message(cid,text['message_name'])    
 
+# this account menu  for user 
 @bot.message_handler(func=lambda message : message.text==button['personal_id'])
 def personal_id_func(message):
     cid=message.chat.id
@@ -1282,7 +1364,7 @@ def personal_id_func(message):
     user_step[cid]=1252
     bot.send_message(cid,text['message_national_code'])      
 
-
+# this account menu  for user 
 @bot.message_handler(func=lambda message : message.text==button['mobile'])
 def mobile_phone_func(message):
     cid=message.chat.id
@@ -1291,7 +1373,11 @@ def mobile_phone_func(message):
     markup.add(KeyboardButton(button['send number'], request_contact=True))
     user_step[cid]= 1253
     bot.send_message(cid, text['share_phone'], reply_markup=markup)
-    
+ 
+
+
+ 
+# this account menu  for user    
 @bot.message_handler(func=lambda message : message.text==button['adress'])
 def adress_func(message):
     cid=message.chat.id
@@ -1299,7 +1385,8 @@ def adress_func(message):
     user_step[cid]=1254
     bot.send_message(cid,text['adress_message'])      
      
-       
+
+# this account menu  for user        
 @bot.message_handler(content_types= ['contact'])
 def contact_handler(message):
     cid=message.chat.id
@@ -1324,6 +1411,7 @@ def contact_handler(message):
             bot.send_message(cid,text['mobile_error'], reply_markup=markup)   
     
 
+# this account menu  for user 
 @bot.message_handler(func=lambda message : message.text==button['register'])
 def register_account_func(message):
     cid=message.chat.id
@@ -1366,7 +1454,7 @@ def register_account_func(message):
         bot.send_message(cid,text['message_name'])              
 
         
-
+# this account menu  for user 
 @bot.message_handler(func=lambda message : message.text==button['contact_to_me'])
 def contact_to_me_func(message):
     cid=message.chat.id
@@ -1375,7 +1463,7 @@ def contact_to_me_func(message):
         bot.send_message(cid,text['call_admin'])
 
 
-
+# this handler for take photo
 @bot.message_handler(content_types=['photo'])
 def photo_handler(message):
     cid =message.chat.id
@@ -1398,7 +1486,7 @@ def photo_handler(message):
 
 
 
-
+# ALL MESSAGE INCOMING
 @bot.message_handler(func=lambda message :True)
 def message_func(message):
     print(message)
@@ -1546,7 +1634,6 @@ def message_func(message):
             make_search_inlinemarkup(cid)        
         else :
             bot.send_message(cid,text['enter_corect'])
-            
     elif (user_step[cid] >=3221 and user_step[cid] <=3223 ) or (user_step[cid] >=2221 and user_step[cid] <=2223) :
         flag =1
         m=message.text
@@ -1581,5 +1668,17 @@ def message_func(message):
                 make_edit_adminaccount_inline(cid=cid,result=result)
         else :
             bot.send_message(cid,text['enter_corect'])            
+    elif user_step[cid] ==2311 or user_step[cid] ==3311 :
+        result = search_on_user(fullname=m)    
+        if len(result) == 0 :
+            if user_step[cid] == 2311 :
+                user_step[cid] = 2310
+            elif user_step[cid] == 3311:
+                user_step[cid] = 3310                   
+            bot.send_message(cid,text['not_exist'])
+            make_buy_invoice_inlinemarkup(cid=cid)
+        else :
+            make_buy_invoice_inlinemarkup(cid=cid,result=result)
+
     
 bot.infinity_polling()
