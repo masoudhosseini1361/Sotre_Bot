@@ -34,6 +34,7 @@ kala=dict()                     #kala={id:[kalaname,buy_price,sale_price,name_ca
 kala_temp= dict()               #kala_temp ={cid={kalaname :name ,category:category,image_file_id :file_id ,sale_price:price,}}
 mid_cid=dict()                  #mid_cid={cid:mid,........}
 cid_user=dict()                   #cid_user={cid:user of account cid}
+buy_invoice_temp=dict()             # buy_invoice_temp={user_id:[]}
 result = get_info_user()
 for i in result:
     if i['is_block']=='YES' :
@@ -511,7 +512,7 @@ def make_buy_invoice_inlinemarkup(cid,mid=None,result=result) :
             for i in result :
                 id=i['id']
                 fullname=i['fullname']
-                markup.add(InlineKeyboardButton(fullname,callback_data='buyinvoice-choicename/{id}'))
+                markup.add(InlineKeyboardButton(fullname,callback_data=f'buyinvoice-choicename/{id}'))
             markup.add(InlineKeyboardButton(button['back'],callback_data=f'buyinvoice-back/{u_step}'))
             bot.send_message(cid,text['choice_name'],reply_markup=markup)
     else :
@@ -1112,32 +1113,41 @@ def call_back_handler(call):
         else :
             bot.edit_message_reply_markup(cid, mid, reply_markup=None)
     elif data.startswith('buyinvoice'):
-        data = data.split('-')[-1]
-        if data =='searchname':
-            mid_cid.update({cid:mid})
-            if data =='2310' :
-                user_step[cid] =2311
-            elif  data =='3310' :
-                user_step[cid] = 3311
-            bot.edit_message_text(text['name_search2'],cid,mid  , reply_markup=None)
-        elif data == 'choice' :
-            mid_cid.update({cid:mid})
-            pass
-        elif data.startswith('back'):
+        if (user_step[cid] >=3300 and user_step[cid] <3400 ) or (user_step[cid] >=2300 and user_step[cid] <2400) :
             data = data.split('-')[-1]
-            if data =='2310' :
-                user_step[cid] =2300
-                bot.edit_message_text(text['select_menu'],cid,mid  , reply_markup=make_ReplyKeyboardMarkup(user_step[cid]))
-            elif  data =='3310' :
-                user_step[cid] = 3300
-                bot.edit_message_text(text['select_menu'],cid,mid  , reply_markup=make_ReplyKeyboardMarkup(user_step[cid]))  
-            elif data ==2311 :
-                user_step[cid]==2310
-                make_buy_invoice_inlinemarkup(cid=cid,mid=mid)
-            elif data ==3311:
-                user_step[cid]==3310
-                make_buy_invoice_inlinemarkup(cid=cid,mid=mid)
-    
+            if data =='searchname':
+                mid_cid.update({cid:mid})
+                if user_step[cid] ==2310 :
+                    user_step[cid] =2311
+                elif  user_step[cid] ==3310 :
+                    user_step[cid] = 3311
+                bot.edit_message_text(text['name_search2'],cid,mid  , reply_markup=None)
+            elif data.startswith('choicename') :
+                data = data.split('/')[-1]
+                data= int(data)
+                mid_cid.update({cid:mid})
+                
+                
+            elif data.startswith('back'):
+                data = data.split('/')[-1]
+                print(data)
+                data =int(data)
+                if data ==2310 :
+                    user_step[cid] =2300
+                    bot.edit_message_reply_markup(cid, mid, reply_markup=None)
+                    bot.send_message(cid,text['select_menu'] , reply_markup=make_ReplyKeyboardMarkup(user_step[cid]))
+                elif  data ==3310 :
+                    user_step[cid] = 3300
+                    bot.edit_message_reply_markup(cid, mid, reply_markup=None)
+                    bot.send_message(cid,text['select_menu'] , reply_markup=make_ReplyKeyboardMarkup(user_step[cid]))  
+                elif data ==2311 :
+                    user_step[cid]=2310
+                    make_buy_invoice_inlinemarkup(cid=cid,mid=mid)
+                elif data ==3311:
+                    user_step[cid]=3310
+                    make_buy_invoice_inlinemarkup(cid=cid,mid=mid)
+        else :
+            bot.edit_message_reply_markup(cid, mid, reply_markup=None)
     else :
         bot.answer_callback_query(call_id, text['no_data'],cache_time=5)  
         bot.edit_message_reply_markup(cid, mid, reply_markup=None)      
@@ -1491,6 +1501,7 @@ def photo_handler(message):
 def message_func(message):
     print(message)
     cid=message.chat.id
+    print(user_step[cid])
     if cid in block_user :return
     if user_step[cid]==1251 :
         full_name =message.text
@@ -1669,6 +1680,7 @@ def message_func(message):
         else :
             bot.send_message(cid,text['enter_corect'])            
     elif user_step[cid] ==2311 or user_step[cid] ==3311 :
+        m=message.text
         result = search_on_user(fullname=m)    
         if len(result) == 0 :
             if user_step[cid] == 2311 :
