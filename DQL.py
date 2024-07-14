@@ -117,9 +117,37 @@ def get_infokala_where_category(category):
     cursor.close()
     conn.close()
     return result
+
+
+def search_on_kala(kalaname=None ,id=None ) :
+    conn=mysql.connector.connect(**db_config)
+    cursor=conn.cursor(dictionary=True)
+    if kalaname != None :
+        fullname =f'%{kalaname}%'
+        SQL_QURY="SELECT * FROM kala WHERE kalaname like %s"
+        cursor.execute(SQL_QURY,(fullname,))
+    elif id !=None:
+        SQL_QURY="SELECT * FROM kala WHERE id = %s"
+        cursor.execute(SQL_QURY,(id,))
+    result=cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return result
     
 
-#All Function for sale invoice table
+#All Function for buy invoice table
+
+def last_buyinvoice_id() :
+    conn=mysql.connector.connect(**db_config)
+    cursor=conn.cursor(dictionary=True)
+    SQL_QURY="""SELECT i_number FROM buy_invoice ORDER BY i_number DESC LIMIT 1"""
+    cursor.execute(SQL_QURY)
+    result=cursor.fetchall()
+    cursor.close()
+    conn.close()
+    result =result[0]['i_number']
+    return result
+
 
 
 
@@ -139,13 +167,14 @@ def get_info_salrow_where_kala_id(kala_id):
     return result
 
 if __name__ == "__main__":
-    # pass
+    pass
+    # print(search_on_kala(kalaname=None ,id=7 ))
     # print(condition_category( name_category='تی شرت' ))
     # result =search_condition_on_user(cid=6944720842)
     # result=result[0]
     # print(result)
     # print(search_condition_on_user(cid=6944720842))
-    print(search_on_user(fullname='حسینی'))
+    # print(search_on_user(fullname='حسینی'))
     # print(search_on_user(mobile_phone='522'))
     # print(search_on_user(national_code='239'))
     # # print (get_info_salrow_where_kala_id(kala_id=4))

@@ -125,6 +125,16 @@ def edit_update_kala(id,kalaname,image_file_id,sale_price):
     cursor.close()
     conn.close()
 
+def update_kala_with_buyinvoice(id , buy_price , count , m_size ,l_size ,xl_size ,xxl_size):
+    conn=mysql.connector.connect(**db_config)
+    cursor=conn.cursor()
+    SQL_QURY="""UPDATE kala SET buy_price=%s , count= count+%s ,M=M +%s ,L = L + %s , XL = XL + %s , XXL = XXL + %s WHERE id=%s"""
+    cursor.execute(SQL_QURY,(buy_price,count ,m_size ,l_size ,xl_size ,xxl_size,id))
+    conn.commit()
+    cursor.close() 
+    conn.close()
+
+
 def delete_kala(id):
     conn=mysql.connector.connect(**db_config)
     cursor=conn.cursor()
@@ -134,10 +144,35 @@ def delete_kala(id):
     cursor.close()
     conn.close()
 
-# All Function  For invoice  Table
+# All Function  For buy invoice  Table
+
+def insert_buyinvoice(user_id,fullname,date_invoice):
+    conn=mysql.connector.connect(**db_config)
+    cursor=conn.cursor()
+    SQL_QURY="""INSERT IGNORE INTO buy_invoice(user_id,fullname,date_invoice )
+                VALUE(%s,%s,%s)
+    """
+    cursor.execute(SQL_QURY,(user_id,fullname,date_invoice))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+def insert_rowinvoice(i_number,kala_id,kala_name,kala_price,count,total_row):
+    conn=mysql.connector.connect(**db_config)
+    cursor=conn.cursor()
+    SQL_QURY="""INSERT IGNORE INTO buy_row(i_number,kala_id,kala_name,kala_price,count,total_row )
+                VALUE(%s,%s,%s,%s,%s,%s)
+    """
+    cursor.execute(SQL_QURY,(i_number,kala_id,kala_name,kala_price,count,total_row))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+
 
 if __name__ == "__main__":
-    pass
+    # pass
+    insert_rowinvoice(i_number=2,kala_id=4,kala_name='xcxc',kala_price=216556,count=12,total_row=564165)
     # update_show_category(name_category='تی شرت',show_category='NO')
     # update_show_category(name_category='تی شرت',show_category='YES')
     # delete_kala(id=8)

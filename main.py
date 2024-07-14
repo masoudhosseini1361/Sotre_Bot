@@ -34,7 +34,9 @@ kala=dict()                     #kala={id:[kalaname,buy_price,sale_price,name_ca
 kala_temp= dict()               #kala_temp ={cid={kalaname :name ,category:category,image_file_id :file_id ,sale_price:price,}}
 mid_cid=dict()                  #mid_cid={cid:mid,........}
 cid_user=dict()                   #cid_user={cid:user of account cid}
-buy_invoice_temp=dict()             # buy_invoice_temp={user_id:[]}
+buy_invoice_name=dict()             #id_user={cid:[id,fullname,cid]}
+buy_invoice_kala=dict()            # buy_invoice_temp={cid: dict()}
+temp_kala=dict()                #temp_kala={cid:temp dict}
 result = get_info_user()
 for i in result:
     if i['is_block']=='YES' :
@@ -104,7 +106,10 @@ button= {
         'search_name':          'جستجو بر اساس نام',
         'search_nationalcode':  'جستجو براساس کد ملی',
         'search_mobile':        'جستجو بر اساس موبایل', 
-              
+        'add_factor':           'اضافه به فاکتور  ➕',
+        'add_kala_infactor':    'اضافه کالا به فاکتور  ➕',
+        'register_factor' :     ' ثبت فاکتور ✅',
+             
         }
 
 command= {  
@@ -500,28 +505,100 @@ def make_edit_adminaccount_inline(cid ,mid=None,result=None,cid_user_priv=None ,
 
 #make function for buy invoice for admin & manger
 
-def make_buy_invoice_inlinemarkup(cid,mid=None,result=result) :
+def make_buy_invoice_inlinemarkup(cid,mid=None,result=result,kala=None) :
     markup=InlineKeyboardMarkup()
     u_step=user_step[cid]
-    if mid == None :
-        if user_step[cid] ==2310 or user_step[cid]==3310 :
-            markup.add(InlineKeyboardButton(text['name_search'],callback_data='buyinvoice-searchname'))
-            markup.add(InlineKeyboardButton(button['back'],callback_data=f'buyinvoice-back/{u_step}'))
+    # if mid == None :
+    if user_step[cid] ==2310 or user_step[cid]==3310 :
+        markup.add(InlineKeyboardButton(text['name_search'],callback_data='buyinvoice-searchname'))
+        markup.add(InlineKeyboardButton(button['back'],callback_data=f'buyinvoice-back/{u_step}'))
+        if mid == None :
             bot.send_message(cid,text['name_search1'],reply_markup=markup)
-        elif (user_step[cid] ==2311 or user_step[cid]==3311) and result != None :
-            for i in result :
-                id=i['id']
-                fullname=i['fullname']
-                markup.add(InlineKeyboardButton(fullname,callback_data=f'buyinvoice-choicename/{id}'))
-            markup.add(InlineKeyboardButton(button['back'],callback_data=f'buyinvoice-back/{u_step}'))
+        else :
+            bot.edit_message_text(text['name_search1'],cid,mid,reply_markup=markup)    
+    elif (user_step[cid] ==2311 or user_step[cid]==3311) and result != None :
+        for i in result :
+            id=i['id']
+            fullname=i['fullname']
+            select_cid = i['cid']
+            select=f'{id},{fullname},{select_cid}'
+            markup.add(InlineKeyboardButton(fullname,callback_data=f'buyinvoice-choicename/{select}'))
+        markup.add(InlineKeyboardButton(button['back'],callback_data=f'buyinvoice-back/{u_step}'))
+        if mid == None :
             bot.send_message(cid,text['choice_name'],reply_markup=markup)
-    else :
-        if user_step[cid] ==2310 or user_step[cid]==3310 :
-            markup.add(InlineKeyboardButton(text['name_search'],callback_data='buyinvoice-searchname'))
-            markup.add(InlineKeyboardButton(button['back'],callback_data=f'buyinvoice-back/{u_step}'))
-            bot.edit_message_text(text['name_search1'],cid,mid,reply_markup=markup)
-
+        else :
+            bot.edit_message_text(text['choice_name'],cid,mid,reply_markup=markup)
+    elif user_step[cid] == 2312 or user_step[cid]==3312 :
+        markup.add(InlineKeyboardButton(text['search_kala'],callback_data='buyinvoice-searchkala'))
+        markup.add(InlineKeyboardButton(text['enter_id'],callback_data='buyinvoice-enteridkala'))
+        markup.add(InlineKeyboardButton(button['back'],callback_data=f'buyinvoice-back/{u_step}'))
+        if mid == None :
+            bot.send_message(cid,text['search_kala1'],reply_markup=markup)
+        else :
+            bot.edit_message_text(text['search_kala1'],cid,mid,reply_markup=markup) 
+    elif (user_step[cid] ==2315 or user_step[cid]==3315 ) and kala == True :
+        for i in result :
+            id=i['id']
+            kalaname=i['kalaname']
+            select=f'کد کالا :{id}---- نام کالا :{kalaname}'
+            markup.add(InlineKeyboardButton(select,callback_data=f'buyinvoice-choickala/{id}'))
+        markup.add(InlineKeyboardButton(button['back'],callback_data=f'buyinvoice-back/{u_step}'))       
+        if mid == None :
+            bot.send_message(cid,text['choice_kala'],reply_markup=markup) 
+        else :
+            bot.edit_message_text(text['choice_kala'],cid,mid,reply_markup=markup)    
     
+    elif (user_step[cid] ==2316 or user_step[cid]==3316 ) :
+        temp1_kala=dict()
+        if kala != None :
+            id=kala
+            kalaname =result[0]
+            buy_price=result[1]
+            m_size=result[7]
+            l_size =result[8]
+            xl_size =result[9]
+            xxl_size=result[10]
+            count=result[6]
+            temp1_kala.update({'id':kala})
+            temp1_kala.update({'kalaname':kalaname})
+            temp1_kala.update({'buy_price':buy_price})
+            temp1_kala.update({'m_size':m_size})
+            temp1_kala.update({'l_size':l_size})
+            temp1_kala.update({'xl_size':xl_size})
+            temp1_kala.update({'xxl_size': xxl_size})
+            temp1_kala.update({'count':count})
+            temp_kala.update({cid:temp1_kala})
+        else :
+            temp1_kala=temp_kala[cid]
+            id=temp1_kala['id']
+            kalaname =temp1_kala['kalaname']
+            buy_price=temp1_kala['buy_price']
+            m_size=temp1_kala['m_size']
+            l_size =temp1_kala['l_size']
+            xl_size =temp1_kala['xl_size']
+            xxl_size=temp1_kala['xxl_size']
+            count=temp1_kala['count']   
+        markup.add(InlineKeyboardButton(f'کد کالا :{id} ----نام کالا : {kalaname}',callback_data='buyinvoice-invoice/none'))
+        markup.add(InlineKeyboardButton(f'M : {m_size}',callback_data='buyinvoice-invoice/msize'),
+                   InlineKeyboardButton(f'L : {l_size}',callback_data='buyinvoice-invoice/lsize'))
+        markup.add(InlineKeyboardButton(f'XL : {xl_size}',callback_data='buyinvoice-invoice/xlsize'),
+                   InlineKeyboardButton(f'XXL : {xxl_size}',callback_data='buyinvoice-invoice/xxlsize'))
+        markup.add(InlineKeyboardButton(f'جمع کل : {count}',callback_data='buyinvoice-invoice/none'),
+                   InlineKeyboardButton(f'قیمت خرید : {buy_price}',callback_data='buyinvoice-invoice/buyprice'))
+        markup.add(InlineKeyboardButton(button['add_factor'],callback_data=f'buyinvoice-invoice/addfactor'))
+        markup.add(InlineKeyboardButton(button['back'],callback_data=f'buyinvoice-back/{u_step}'),
+                   InlineKeyboardButton(button['cancel'],callback_data=f'buyinvoice-cancel'))
+        if mid == None :
+            bot.send_message(cid,text['enter_count_size'],reply_markup=markup) 
+        else :
+            bot.edit_message_text(text['enter_count_size'],cid,mid,reply_markup=markup) 
+    
+    elif user_step[cid] ==2317 or user_step[cid]==3317  :
+        markup.add(InlineKeyboardButton(button['add_kala_infactor'],callback_data=f'buyinvoice-addfactor/addfactor'))    
+        markup.add(InlineKeyboardButton(button['register_factor'],callback_data=f'buyinvoice-addfactor/sabt'))
+        markup.add(InlineKeyboardButton(button['cancel'],callback_data=f'buyinvoice-cancel'))
+        bot.edit_message_text(text['sabt_factor'],cid,mid,reply_markup=markup) 
+
 # make ReplyKeyboardMarkup
 
 
@@ -1124,10 +1201,158 @@ def call_back_handler(call):
                 bot.edit_message_text(text['name_search2'],cid,mid  , reply_markup=None)
             elif data.startswith('choicename') :
                 data = data.split('/')[-1]
-                data= int(data)
+                #data= int(data)
+                data=data.split(',')
+                data[0]=int(data[0])
+                data[2]=int(data[2])
                 mid_cid.update({cid:mid})
-                
-                
+                buy_invoice_name.update({cid:data})
+                if user_step[cid] == 2311 :
+                    user_step[cid] = 2312
+                elif user_step[cid] == 3311 :
+                    user_step[cid] = 3312    
+                #select kala
+                make_buy_invoice_inlinemarkup(cid,mid=mid)
+            elif data.startswith('searchkala') :
+                bot.edit_message_reply_markup(cid, mid, reply_markup=None) 
+                if user_step[cid] == 2312 :
+                    user_step[cid] = 2313
+                elif user_step[cid] == 3312 :
+                    user_step[cid] = 3313
+                bot.send_message(cid,text['name_kala_search'])     
+            elif data.startswith('enteridkala') :
+                bot.edit_message_reply_markup(cid, mid, reply_markup=None) 
+                if user_step[cid] == 2312 :
+                    user_step[cid] = 2314
+                elif user_step[cid] == 3312 :
+                    user_step[cid] = 3314
+                bot.send_message(cid,text['enter_id1'])
+            elif data.startswith('choickala') :
+                data =data.split('/')[-1]
+                data=int(data)
+                kala_select=kala[data]  
+                if user_step[cid]==2315 :
+                    user_step[cid] =2316
+                elif user_step[cid]==3315 :
+                    user_step[cid] =3316    
+                make_buy_invoice_inlinemarkup(cid,mid=mid,result=kala_select,kala=data)    
+            elif data.startswith('invoice') :
+                data =data.split('/')[-1]
+                mid_cid[cid] =mid
+                if data == 'msize' :
+                    if user_step[cid] == 2316 :
+                        user_step[cid] =2316.1
+                    elif user_step[cid] == 3316 :
+                        user_step[cid] =3316.1 
+                    bot.edit_message_reply_markup(cid, mid, reply_markup=None)
+                    bot.send_message(cid,text['enter_count'])         
+                elif  data == 'lsize' :
+                    if user_step[cid] == 2316 :
+                       user_step[cid] = 2316.2
+                    elif user_step[cid] == 3316 :
+                        user_step[cid] =3316.2 
+                    bot.edit_message_reply_markup(cid, mid, reply_markup=None)
+                    bot.send_message(cid,text['enter_count'])               
+                elif  data == 'xlsize' :
+                    if user_step[cid] == 2316 :
+                        user_step[cid] = 2316.3
+                    elif user_step[cid] == 3316 :
+                        user_step[cid] =3316.3 
+                    bot.edit_message_reply_markup(cid, mid, reply_markup=None)
+                    bot.send_message(cid,text['enter_count'])                
+                elif  data == 'xxlsize' :
+                    if user_step[cid] == 2316 :
+                        user_step[cid] = 2316.4
+                    elif user_step[cid] == 3316 :
+                        user_step[cid] =3316.4 
+                    bot.edit_message_reply_markup(cid, mid, reply_markup=None)
+                    bot.send_message(cid,text['enter_count'])    
+                elif  data == 'buyprice' :
+                    if user_step[cid] == 2316 :
+                        user_step[cid] = 2316.5
+                    elif user_step[cid] == 3316 :
+                        user_step[cid] =3316.5 
+                    bot.edit_message_reply_markup(cid, mid, reply_markup=None)
+                    bot.send_message(cid,text['buy_price'])                       
+                elif  data == 'addfactor' :
+                    if user_step[cid] == 2316 :
+                        user_step[cid] = 2317
+                    elif user_step[cid] == 3316 :
+                        user_step[cid] =3317
+                    flag =0 
+                    temp=dict()
+                    temp1=dict()
+                    if cid in buy_invoice_kala :
+                        temp=buy_invoice_kala[cid]
+                        row_number =len(temp) +1
+                        temp1=temp_kala[cid]
+                        # print("temp1")
+                        # print("**************************************************************************")
+                        # print(temp1)
+                        # print("**************************************************************************")
+                        for i in temp :
+                            if temp[i]['id'] == temp1['id'] :
+                                flag =1
+                        
+                        if flag ==0 :        
+                            temp.update({row_number :temp1})
+                            buy_invoice_kala.update({cid:temp})
+                            # print("buy invoice kala")
+                            # print("**************************************************************************")
+                            # print(buy_invoice_kala)
+                            # print("**************************************************************************")
+                        else :
+                            bot.send_message(cid,text['reapat_kala'])    
+                    else :
+                        temp1=temp_kala[cid]
+                        print(temp1)
+                        temp.update({1 :temp1})
+                        buy_invoice_kala.update({cid:temp})
+                        # print("buy invoice kala")
+                        # print("**************************************************************************")
+                        # print(buy_invoice_kala)
+                        # print("**************************************************************************")
+                    temp_kala.pop(cid)        
+                    make_buy_invoice_inlinemarkup(cid,mid=mid)    
+            elif data.startswith('addfactor'):
+                data =data.split('/')[-1]
+                if data == 'addfactor' :
+                    if user_step[cid] == 2317 :
+                        user_step[cid] = 2312
+                    elif user_step[cid] == 3317 :
+                        user_step[cid] =3312
+                    make_buy_invoice_inlinemarkup(cid,mid=mid)    
+                elif data =='sabt' :
+                    invoice_name=[]
+                    invoice_kala=dict()
+                    today=date_today()
+                    invoice_name = buy_invoice_name[cid]
+                    insert_buyinvoice(user_id=invoice_name[0],fullname=invoice_name[1],date_invoice=today)
+                    invoice_number=last_buyinvoice_id()
+                    invoice_kala=buy_invoice_kala[cid]
+                    for i in invoice_kala :
+                        # temp=invoice_kala[i]
+                        kala_id=invoice_kala[i]['id']
+                        kala_name=invoice_kala[i]['kalaname']
+                        kala_price=invoice_kala[i]['buy_price']
+                        count=invoice_kala[i]['count']
+                        m_size=invoice_kala[i]['m_size']
+                        l_size=invoice_kala[i]['l_size']
+                        xl_size=invoice_kala[i]['xl_size']
+                        xxl_size=invoice_kala[i]['xxl_size']
+                        total_row=kala_price * count
+                        insert_rowinvoice(i_number=invoice_number , kala_id=kala_id , kala_name=kala_name , kala_price=kala_price , count=count,total_row=total_row)
+                        update_kala_with_buyinvoice(id=kala_id , buy_price=kala_price , count=count , m_size=m_size ,l_size=l_size ,xl_size=xl_size ,xxl_size=xxl_size)
+                    if user_step[cid] == 2317 :
+                        user_step[cid] = 2300
+                    elif user_step[cid] == 3317 :
+                        user_step[cid] =3300 
+                    buy_invoice_kala.pop(cid)  
+                    bot.edit_message_reply_markup(cid, mid, reply_markup=None)
+                    bot.answer_callback_query(call_id, text['sabt'],show_alert=True)        
+                    make_ReplyKeyboardMarkup(user_step[cid])    
+            elif data.startswith('cancel'):
+                pass                           
             elif data.startswith('back'):
                 data = data.split('/')[-1]
                 print(data)
@@ -1146,6 +1371,27 @@ def call_back_handler(call):
                 elif data ==3311:
                     user_step[cid]=3310
                     make_buy_invoice_inlinemarkup(cid=cid,mid=mid)
+                
+                elif data ==3312:
+                    user_step[cid]=3310
+                    make_buy_invoice_inlinemarkup(cid=cid,mid=mid)
+                elif data ==2312:
+                    user_step[cid]=231
+                    make_buy_invoice_inlinemarkup(cid=cid,mid=mid)
+                    
+                elif data ==3315:
+                    user_step[cid]=3312
+                    make_buy_invoice_inlinemarkup(cid=cid,mid=mid)
+                elif data ==2315:
+                    user_step[cid]=2312
+                    make_buy_invoice_inlinemarkup(cid=cid,mid=mid)
+                elif data >=2316 and data <2317 :
+                    user_step[cid]=2312
+                    make_buy_invoice_inlinemarkup(cid=cid,mid=mid)
+                elif data >= 3316 and data < 3317 :
+                    user_step[cid]= 3312    
+                    make_buy_invoice_inlinemarkup(cid=cid,mid=mid)
+                            
         else :
             bot.edit_message_reply_markup(cid, mid, reply_markup=None)
     else :
@@ -1691,6 +1937,81 @@ def message_func(message):
             make_buy_invoice_inlinemarkup(cid=cid)
         else :
             make_buy_invoice_inlinemarkup(cid=cid,result=result)
-
-    
+    elif (user_step[cid] >=3313 and user_step[cid] <=3314 ) or (user_step[cid] >=2213 and user_step[cid] <=2214) :  
+        flag =1  
+        m=message.text
+        if user_step[cid] ==3313 or user_step[cid] ==2313 :    
+            result = search_on_kala(kalaname=m )
+        elif user_step[cid] ==3314 or user_step[cid] ==2314 :
+            if m.isnumeric() :
+                m=int(m)
+                result = search_on_kala(id=m )
+            else :
+                flag =0
+        if flag ==1 :        
+            if len(result) ==0 :
+                bot.send_message(cid,text['not_exist'])
+                if user_step[cid]==3313 or user_step[cid] == 3314 :
+                    user_step[cid]= 3312
+                elif user_step[cid] ==2313 or user_step[cid] ==2314 :
+                    user_step[cid] = 2312
+                make_buy_invoice_inlinemarkup(cid=cid)      
+            else :
+                if user_step[cid]==3313 or user_step[cid] == 3314 :
+                    user_step[cid]= 3315
+                elif user_step[cid] ==2313 or user_step[cid] ==2314 :
+                    user_step[cid] = 2315
+                make_buy_invoice_inlinemarkup(cid=cid,result =result ,kala=True)          
+        else :
+            bot.send_message(cid,text['enter_corect'])                
+    elif (user_step[cid] >=3316 and user_step[cid] <3317 ) or (user_step[cid] >=2316 and user_step[cid] <2317) :          
+        m =message.text
+        if m.isnumeric() :
+            m=int(m)
+            if user_step[cid] ==2316.1 or user_step[cid] == 3316.1 :
+                m1=m-temp_kala[cid]['m_size']
+                temp_kala[cid]['m_size']=m
+                temp_kala[cid]['count'] = temp_kala[cid]['count'] + m1
+                if user_step[cid] == 2316.1 :
+                    user_step[cid] =2316
+                elif user_step[cid] == 3316.1 :
+                    user_step[cid] =3316                
+            
+            elif user_step[cid] ==2316.2 or user_step[cid] == 3316.2 :
+                m1=m-temp_kala[cid]['l_size']
+                temp_kala[cid]['l_size']=m
+                temp_kala[cid]['count'] = temp_kala[cid]['count'] + m1
+                if user_step[cid] == 2316.2 :
+                    user_step[cid] =2316
+                elif user_step[cid] == 3316.2 :
+                    user_step[cid] =3316
+            
+            elif user_step[cid] ==2316.3 or user_step[cid] == 3316.3 :
+                m1=m-temp_kala[cid]['xl_size']
+                temp_kala[cid]['xl_size']=m
+                temp_kala[cid]['count'] = temp_kala[cid]['count'] + m1
+                if user_step[cid] == 2316.3 :
+                    user_step[cid] =2316
+                elif user_step[cid] == 3316.3 :
+                    user_step[cid] =3316  
+            
+            elif user_step[cid] ==2316.4 or user_step[cid] == 3316.4 :
+                m1=m-temp_kala[cid]['xxl_size']
+                temp_kala[cid]['xxl_size']=m
+                temp_kala[cid]['count'] = temp_kala[cid]['count'] + m1
+                if user_step[cid] == 2316.4 :
+                    user_step[cid] =2316
+                elif user_step[cid] == 3316.4 :
+                    user_step[cid] =3316        
+            
+            elif user_step[cid] ==2316.5 or user_step[cid] == 3316.5 :
+                temp_kala[cid]['buy_price']=m
+                if user_step[cid] == 2316.5 :
+                    user_step[cid] =2316
+                elif user_step[cid] == 3316.5 :
+                    user_step[cid] =3316                    
+            make_buy_invoice_inlinemarkup(cid=cid)             
+        else :
+            bot.send_message(cid,text['enter_corect'])
+                
 bot.infinity_polling()

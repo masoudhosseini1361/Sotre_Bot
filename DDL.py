@@ -111,6 +111,7 @@ def create_sale_invoice_table():
     SQL_QURY="""CREATE TABLE IF NOT EXISTS sale_invoice(
         i_number            INT AUTO_INCREMENT NOT NULL ,
         user_id             INT,
+        fullname            varchar(70),
         date_invoice        varchar(10),
         PRIMARY KEY(i_number),
         FOREIGN KEY (user_id) REFERENCES user (id)
@@ -126,6 +127,7 @@ def create_sale_row_table():
     SQL_QURY="""CREATE TABLE IF NOT EXISTS sale_row(
         i_number            INT ,
         kala_id             INT,
+        kala_name           VARCHAR(50),
         kala_price          INT,
         count               SMALLINT(255),
         total_row           INT,
@@ -145,6 +147,7 @@ def create_buy_invoice_table():
     SQL_QURY="""CREATE TABLE IF NOT EXISTS buy_invoice(
         i_number            INT AUTO_INCREMENT NOT NULL ,
         user_id             INT,
+        fullname            varchar(70),
         date_invoice        varchar(10),
         PRIMARY KEY(i_number),
         FOREIGN KEY (user_id) REFERENCES user (id)
@@ -160,10 +163,11 @@ def create_buy_row_table():
     SQL_QURY="""CREATE TABLE IF NOT EXISTS buy_row(
         i_number            INT ,
         kala_id             INT,
+        kala_name           VARCHAR(50),
         kala_price          INT,
         count               SMALLINT(255),
         total_row           INT,
-        FOREIGN KEY (i_number) REFERENCES sale_invoice(i_number),
+        FOREIGN KEY (i_number) REFERENCES buy_invoice(i_number),
         FOREIGN KEY (kala_id) REFERENCES kala (id)
     )
     """   
