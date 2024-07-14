@@ -175,7 +175,7 @@ def create_buy_row_table():
     cursor.close()
     conn.close()
     
-
+                                        
 
 
         

@@ -1286,21 +1286,12 @@ def call_back_handler(call):
                         temp=buy_invoice_kala[cid]
                         row_number =len(temp) +1
                         temp1=temp_kala[cid]
-                        # print("temp1")
-                        # print("**************************************************************************")
-                        # print(temp1)
-                        # print("**************************************************************************")
                         for i in temp :
                             if temp[i]['id'] == temp1['id'] :
                                 flag =1
-                        
                         if flag ==0 :        
                             temp.update({row_number :temp1})
                             buy_invoice_kala.update({cid:temp})
-                            # print("buy invoice kala")
-                            # print("**************************************************************************")
-                            # print(buy_invoice_kala)
-                            # print("**************************************************************************")
                         else :
                             bot.send_message(cid,text['reapat_kala'])    
                     else :
@@ -1308,10 +1299,6 @@ def call_back_handler(call):
                         print(temp1)
                         temp.update({1 :temp1})
                         buy_invoice_kala.update({cid:temp})
-                        # print("buy invoice kala")
-                        # print("**************************************************************************")
-                        # print(buy_invoice_kala)
-                        # print("**************************************************************************")
                     temp_kala.pop(cid)        
                     make_buy_invoice_inlinemarkup(cid,mid=mid)    
             elif data.startswith('addfactor'):
@@ -1323,15 +1310,17 @@ def call_back_handler(call):
                         user_step[cid] =3312
                     make_buy_invoice_inlinemarkup(cid,mid=mid)    
                 elif data =='sabt' :
+                    sum_total_price=0
+                    sum_count = 0
                     invoice_name=[]
                     invoice_kala=dict()
                     today=date_today()
                     invoice_name = buy_invoice_name[cid]
+                    invoice_name_cid = invoice_name[2]
                     insert_buyinvoice(user_id=invoice_name[0],fullname=invoice_name[1],date_invoice=today)
                     invoice_number=last_buyinvoice_id()
                     invoice_kala=buy_invoice_kala[cid]
                     for i in invoice_kala :
-                        # temp=invoice_kala[i]
                         kala_id=invoice_kala[i]['id']
                         kala_name=invoice_kala[i]['kalaname']
                         kala_price=invoice_kala[i]['buy_price']
@@ -1341,18 +1330,39 @@ def call_back_handler(call):
                         xl_size=invoice_kala[i]['xl_size']
                         xxl_size=invoice_kala[i]['xxl_size']
                         total_row=kala_price * count
+                        sum_total_price += total_row
+                        sum_count += count
                         insert_rowinvoice(i_number=invoice_number , kala_id=kala_id , kala_name=kala_name , kala_price=kala_price , count=count,total_row=total_row)
                         update_kala_with_buyinvoice(id=kala_id , buy_price=kala_price , count=count , m_size=m_size ,l_size=l_size ,xl_size=xl_size ,xxl_size=xxl_size)
                     if user_step[cid] == 2317 :
                         user_step[cid] = 2300
                     elif user_step[cid] == 3317 :
                         user_step[cid] =3300 
+                    message=f'طبق فاکتور شماره {invoice_number} در تاریخ {today} مبلغ {sum_total_price} و تعداد {sum_count} کالا از شما خریداری شد.      با تشکر'
+                    bot.send_message(invoice_name_cid,message)
                     buy_invoice_kala.pop(cid)  
                     bot.edit_message_reply_markup(cid, mid, reply_markup=None)
-                    bot.answer_callback_query(call_id, text['sabt'],show_alert=True)        
-                    make_ReplyKeyboardMarkup(user_step[cid])    
+                    bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_step[cid]))
+                    bot.answer_callback_query(call_id, text['sabt'],show_alert=True)            
             elif data.startswith('cancel'):
-                pass                           
+                if user_step[cid] == 3316 or user_step[cid] == 2316 :
+                    if user_step[cid] == 2316 :
+                        user_step[cid] = 2300
+                    elif user_step[cid] == 3316 :
+                        user_step[cid] = 3300    
+                    if len(buy_invoice_kala.keys()) != 0 :
+                        buy_invoice_kala.pop(cid)   
+                    bot.edit_message_reply_markup(cid, mid, reply_markup=None)
+                    bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_step[cid]))                        
+                elif user_step[cid] == 3317 or user_step[cid] == 2317 : 
+                    if user_step[cid] == 2317 :
+                        user_step[cid] = 2300
+                    elif user_step[cid] == 3317 :
+                        user_step[cid] = 3300    
+                    if len(buy_invoice_kala.keys()) != 0 :
+                        buy_invoice_kala.pop(cid) 
+                    bot.edit_message_reply_markup(cid, mid, reply_markup=None)
+                    bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_step[cid]))                        
             elif data.startswith('back'):
                 data = data.split('/')[-1]
                 print(data)
@@ -1371,7 +1381,6 @@ def call_back_handler(call):
                 elif data ==3311:
                     user_step[cid]=3310
                     make_buy_invoice_inlinemarkup(cid=cid,mid=mid)
-                
                 elif data ==3312:
                     user_step[cid]=3310
                     make_buy_invoice_inlinemarkup(cid=cid,mid=mid)
