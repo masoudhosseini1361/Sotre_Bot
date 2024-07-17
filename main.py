@@ -32,11 +32,14 @@ category_temp=dict()          #category_temp={cid :[name_category,mid]}
 category_oldname=dict()        #category_oldname={cid:oldnamecategory,....}
 kala=dict()                     #kala={id:[kalaname,buy_price,sale_price,name_category,kala_date,image_file_id,count,M,L,XL,XXL],.....}
 kala_temp= dict()               #kala_temp ={cid={kalaname :name ,category:category,image_file_id :file_id ,sale_price:price,}}
+show_kala=dict()
+count_of_size =dict()           #count_of_size={cid:{m:count ,l: count,xl :count ,xxl :count}}
 mid_cid=dict()                  #mid_cid={cid:mid,........}
 cid_user=dict()                   #cid_user={cid:user of account cid}
 buy_invoice_name=dict()             #id_user={cid:[id,fullname,cid]}
 buy_invoice_kala=dict()            # buy_invoice_temp={cid: dict()}
 temp_kala=dict()                #temp_kala={cid:temp dict}
+shoping_cart=dict()             #shoping_cart={cid:{kalaid1:{size:qty , sale_price:price},kalaid2:{},....},...}
 result = get_info_user()
 for i in result:
     if i['is_block']=='YES' :
@@ -75,6 +78,7 @@ button= {
         'pants' :                'شلوار',
         'home' :                 'منوی اصلی  🏛️',
         'cart_basket' :          'سبد خرید  🛒' ,
+        'add_to_card':           'اضافه به سبد خرید  🛒',
         'user_profile' :         'مشخصات کاربری',
         'full_name':             'نام و نام خانوادگی' ,
         'mobile' :               'شماره موبایل' ,
@@ -505,7 +509,7 @@ def make_edit_adminaccount_inline(cid ,mid=None,result=None,cid_user_priv=None ,
 
 #make function for buy invoice for admin & manger
 
-def make_buy_invoice_inlinemarkup(cid,mid=None,result=result,kala=None) :
+def make_buy_invoice_inlinemarkup(cid,mid=None,result=None ,kala=None) :
     markup=InlineKeyboardMarkup()
     u_step=user_step[cid]
     # if mid == None :
@@ -599,7 +603,107 @@ def make_buy_invoice_inlinemarkup(cid,mid=None,result=result,kala=None) :
         markup.add(InlineKeyboardButton(button['cancel'],callback_data=f'buyinvoice-cancel'))
         bot.edit_message_text(text['sabt_factor'],cid,mid,reply_markup=markup) 
 
-# make ReplyKeyboardMarkup
+
+
+def make_buy_menu_user(cid ,mid =None,number_kala=None):
+    markup=InlineKeyboardMarkup()
+    u_step=user_step[cid]
+    if number_kala != None :
+        temp=show_kala[cid]
+    if user_step[cid] == 1100 :
+        for i in category :
+            if category[i] == 'YES':
+               markup.add(InlineKeyboardButton(i,callback_data=f'buyuser-category/{i}'))
+        markup.add(InlineKeyboardButton(button['back'],callback_data=f'buyuser-back/{u_step}'))
+        if mid == None :
+            bot.send_message(cid,text['choice_group'],reply_markup=markup)    
+        else :
+            bot.edit_message_text(text['choice_group'],cid,mid,reply_markup=markup)   
+    elif user_step[cid] == 1110 :         
+        image_file_id= temp[number_kala]['image_file_id'] 
+        kala_name=temp[number_kala]['kalaname']
+        kala_id = temp[number_kala]['id']
+        sale_price=temp[number_kala]['sale_price']
+        # print(count_of_size[cid])
+        m_size =count_of_size[cid]['m']
+        l_size = count_of_size[cid]['l']
+        xl_size = count_of_size[cid]['xl']
+        xxl_size = count_of_size[cid]['xxl']
+        markup.add(InlineKeyboardButton('M : سایز',callback_data=f'buyuser-showkala/none'))
+        markup.add(InlineKeyboardButton('➖',callback_data=f'buyuser-showkala/minus&m={number_kala}'),
+                   InlineKeyboardButton(f'{m_size}',callback_data=f'buyuser-showkala/none'), 
+                   InlineKeyboardButton('➕',callback_data=f'buyuser-showkala/plus&m={number_kala}')
+                  )
+        markup.add(InlineKeyboardButton('L : سایز',callback_data=f'buyuser-showkala/none'))
+        markup.add(InlineKeyboardButton('➖',callback_data=f'buyuser-showkala/minus&l={number_kala}'),
+                   InlineKeyboardButton(f'{l_size}',callback_data=f'buyuser-showkala/none'), 
+                   InlineKeyboardButton('➕',callback_data=f'buyuser-showkala/plus&l={number_kala}')
+                  )
+        markup.add(InlineKeyboardButton(' سایز : XL ',callback_data=f'buyuser-showkala/none'))
+        markup.add(InlineKeyboardButton('➖',callback_data=f'buyuser-showkala/minus&xl={number_kala}'),
+                   InlineKeyboardButton(f'{xl_size}',callback_data=f'buyuser-showkala/none'), 
+                   InlineKeyboardButton('➕  ',callback_data=f'buyuser-showkala/plus&xl={number_kala}')
+                  )
+        markup.add(InlineKeyboardButton(' سایز : XXL',callback_data=f'buyuser-showkala/none'))
+        markup.add(InlineKeyboardButton('➖',callback_data=f'buyuser-showkala/minus&xxl={number_kala}'),
+                   InlineKeyboardButton(f'{xxl_size}',callback_data=f'buyuser-showkala/none'), 
+                   InlineKeyboardButton('➕',callback_data=f'buyuser-showkala/plus&xxl={number_kala}')
+                  )
+        markup.add(InlineKeyboardButton('  ⬅️ ',callback_data=f'buyuser-showkala/backward={number_kala}'),
+                   InlineKeyboardButton('  ➡️  ',callback_data=f'buyuser-showkala/forward={number_kala}')
+                  )
+        markup.add(InlineKeyboardButton(button['add_to_card'],callback_data=f'buyuser-showkala/addtocard={number_kala}'))
+        
+        markup.add(InlineKeyboardButton(button['back'],callback_data=f'buyuser-back/{u_step}'),
+                   InlineKeyboardButton(button['cancel'],callback_data=f'buyuser-showkala/cancel={u_step}')
+                  )
+        if user_step[cid]==1110 :
+            user_step[cid]=1111
+        bot.send_photo(cid,image_file_id,caption=f'کدکالا : {kala_id}---- نام کالا : {kala_name}---قیمت :{sale_price}',reply_markup=markup)
+        
+    elif user_step[cid] == 1111 :    
+        image_file_id= temp[number_kala]['image_file_id'] 
+        kala_name=temp[number_kala]['kalaname']
+        kala_id = temp[number_kala]['id']
+        sale_price=temp[number_kala]['sale_price']
+        m_size =count_of_size[cid]['m']
+        l_size = count_of_size[cid]['l']
+        xl_size = count_of_size[cid]['xl']
+        xxl_size = count_of_size[cid]['xxl']
+        markup.add(InlineKeyboardButton('M : سایز',callback_data=f'buyuser-showkala/none'))
+        markup.add(InlineKeyboardButton('➖',callback_data=f'buyuser-showkala/minus&m={number_kala}'),
+                   InlineKeyboardButton(f'{m_size}',callback_data=f'buyuser-showkala/none'), 
+                   InlineKeyboardButton('➕',callback_data=f'buyuser-showkala/plus&m={number_kala}')
+                  )
+        markup.add(InlineKeyboardButton('L : سایز',callback_data=f'buyuser-showkala/none'))
+        markup.add(InlineKeyboardButton('➖',callback_data=f'buyuser-showkala/minus&l={number_kala}'),
+                   InlineKeyboardButton(f'{l_size}',callback_data=f'buyuser-showkala/none'), 
+                   InlineKeyboardButton('➕',callback_data=f'buyuser-showkala/plus&l={number_kala}')
+                  )
+        markup.add(InlineKeyboardButton(' سایز : XL ',callback_data=f'buyuser-showkala/none'))
+        markup.add(InlineKeyboardButton('➖',callback_data=f'buyuser-showkala/minus&xl={number_kala}'),
+                   InlineKeyboardButton(f'{xl_size}',callback_data=f'buyuser-showkala/none'), 
+                   InlineKeyboardButton('➕  ',callback_data=f'buyuser-showkala/plus&xl={number_kala}')
+                  )
+        markup.add(InlineKeyboardButton(' سایز : XXL',callback_data=f'buyuser-showkala/none'))
+        markup.add(InlineKeyboardButton('➖',callback_data=f'buyuser-showkala/minus&xxl={number_kala}'),
+                   InlineKeyboardButton(f'{xxl_size}',callback_data=f'buyuser-showkala/none'), 
+                   InlineKeyboardButton('➕',callback_data=f'buyuser-showkala/plus&xxl={number_kala}')
+                  )
+        markup.add(InlineKeyboardButton('  ⬅️ ',callback_data=f'buyuser-showkala/backward={number_kala}'),
+                   InlineKeyboardButton('  ➡️  ',callback_data=f'buyuser-showkala/forward={number_kala}')
+                  )
+        markup.add(InlineKeyboardButton(button['add_to_card'],callback_data=f'buyuser-showkala/addtocard={number_kala}'))
+        
+        markup.add(InlineKeyboardButton(button['back'],callback_data=f'buyuser-back/{u_step}'),
+                   InlineKeyboardButton(button['cancel'],callback_data=f'buyuser-showkala/cancel={u_step}')
+                  )
+        # bot.send_photo(cid,image_file_id,caption=f'کدکالا : {kala_id}---- نام کالا : {kala_name}---قیمت :{sale_price}',reply_markup=markup)
+        bot.edit_message_caption(f'کدکالا : {kala_id}---- نام کالا : {kala_name}---قیمت :{sale_price}',cid,mid,reply_markup=markup)
+
+    
+    
+
 
 
 #define the main  menu
@@ -666,7 +770,10 @@ def make_ReplyKeyboardMarkup(user_s=None):
             markup.add(button['user_account'],button['buy'])
             markup.add(button['contact_to_me'],button['help'])
             return(markup)
-        
+            # buy invoice for user
+        elif user_s == 1100 :
+            markup.add(button['home'])
+            return(markup)
         
 
 
@@ -1403,6 +1510,231 @@ def call_back_handler(call):
                             
         else :
             bot.edit_message_reply_markup(cid, mid, reply_markup=None)
+    elif data.startswith('buyuser'):
+        if user_step[cid] >=1100 and user_step[cid] <1200 :
+            data = data.split('-')[-1]
+            if data.startswith('category'):
+                data = data.split('/')[-1]
+                if data  in category :
+                    temp=dict()
+                    number=1
+                    result = search_on_kala(name_category=data )
+                    if len(result) !=0 :
+                        for i in result :
+                            if i['count'] != 0:
+                                temp.update({number:i})
+                                number +=1
+                        if len(temp) !=0 :
+                            show_kala.update({cid:temp})        
+                            # print(show_kala)
+                            temp=dict()
+                            if show_kala[cid][1]['M'] !=0 :
+                                temp.update({'m':0})
+                            if show_kala[cid][1]['L'] !=0 :
+                                temp.update({'l':0})
+                            if show_kala[cid][1]['XL'] !=0 :
+                                temp.update({'xl':0})
+                            if show_kala[cid][1]['XXL'] !=0 :
+                                temp.update({'xxl':0})
+                            count_of_size.update({cid:temp})
+                            if user_step[cid] ==1100 :
+                                user_step[cid] =1110
+                            bot.edit_message_reply_markup(cid,mid,reply_markup=None)    
+                            make_buy_menu_user(cid=cid ,mid =mid,number_kala=1)
+                        else :    
+                            bot.answer_callback_query(call_id, text['no_kala'],show_alert=True)
+                    else :
+                      bot.answer_callback_query(call_id, text['no_kala'],show_alert=True)
+            elif data.startswith('showkala'):
+                data = data.split('/')[-1]
+                if data.startswith('minus'):
+                    data=data.split('&')[-1]
+                    if data.startswith('m'):
+                        data=data.split('=')[-1]
+                        data =int(data)
+                        if count_of_size[cid]['m'] > 0:
+                            count_of_size[cid]['m'] -=1
+                            make_buy_menu_user(cid=cid ,mid =mid,number_kala=data)
+                    elif data.startswith('l'):
+                        data=data.split('=')[-1]
+                        data =int(data)
+                        if count_of_size[cid]['l'] > 0:
+                            count_of_size[cid]['l'] -=1
+                            make_buy_menu_user(cid=cid ,mid =mid,number_kala=data)
+                    elif data.startswith('xl'):
+                        data=data.split('=')[-1]
+                        data=int(data)
+                        if count_of_size[cid]['xl'] > 0:
+                            count_of_size[cid]['xl'] -=1
+                            make_buy_menu_user(cid=cid ,mid =mid,number_kala=data)
+                    elif data.startswith('xxl'):
+                        data=data.split('=')[-1]
+                        data =int(data)
+                        if count_of_size[cid]['xxl'] > 0:
+                            count_of_size[cid]['xxl'] -=1
+                            make_buy_menu_user(cid=cid ,mid =mid,number_kala=data)     
+                    
+                    
+                elif  data.startswith('plus'): 
+                    # print(show_kala[cid])   
+                    data=data.split('&')[-1]
+                    if data.startswith('m'):
+                        data=data.split('=')[-1]
+                        data =int(data)
+                        if show_kala[cid][data]['M'] > count_of_size[cid]['m'] :
+                            count_of_size[cid]['m'] +=1
+                            make_buy_menu_user(cid=cid ,mid =mid,number_kala=data)
+                    elif data.startswith('l'):
+                        data=data.split('=')[-1]
+                        data =int(data)
+                        if show_kala[cid][data]['L'] > count_of_size[cid]['l'] :
+                            count_of_size[cid]['l'] +=1
+                            make_buy_menu_user(cid=cid ,mid =mid,number_kala=data)
+                    elif data.startswith('xl'):
+                        data=data.split('=')[-1]
+                        data =int(data)
+                        if show_kala[cid][data]['XL'] > count_of_size[cid]['xl'] :
+                            count_of_size[cid]['xl'] +=1
+                            make_buy_menu_user(cid=cid ,mid =mid,number_kala=data)
+                    elif data.startswith('xxl'):
+                        data=data.split('=')[-1]
+                        data =int(data)
+                        print(show_kala[cid][data]['XXL'])
+                        if show_kala[cid][data]['XXL'] > count_of_size[cid]['xxl'] :
+                            count_of_size[cid]['xxl'] +=1  
+                            make_buy_menu_user(cid=cid ,mid =mid,number_kala=data)                          
+                    
+                elif  data.startswith('backward'):    
+                    data=data.split('=')[-1]
+                    data=int(data)  
+                    if data > 1 :
+                        for i in count_of_size[cid] :
+                            count_of_size[cid][i] =0 
+                        data -=1
+                        bot.delete_message(cid,mid)
+                        if user_step[cid]==1111 :
+                            user_step[cid]=1110    
+                        make_buy_menu_user(cid=cid ,mid =mid,number_kala=data)                    
+                    else:
+                        bot.answer_callback_query(call_id,text['first_kala'],show_alert=True)    
+                elif  data.startswith('forward'):    
+                    data=data.split('=')[-1]
+                    data=int(data)
+                    if data < len(show_kala[cid]) :
+                        for i in count_of_size[cid] :
+                            count_of_size[cid][i] =0 
+                        data +=1
+                        bot.delete_message(cid,mid)                     
+                        if user_step[cid]==1111 :
+                            user_step[cid]=1110   
+                        make_buy_menu_user(cid=cid ,mid =mid,number_kala=data)    
+                    else:
+                        bot.answer_callback_query(call_id,text['last_kala'],show_alert=True)                  
+                elif  data.startswith('addtocard'): 
+                    data= data.split('=')[-1]
+                    data= int(data)   
+                    flag =0
+                    for i in count_of_size[cid] :
+                        if count_of_size[cid][i] > 0 :
+                            flag =1
+                            break
+                    if flag == 1 :
+                        if cid in shoping_cart :
+                            if show_kala[cid][data]['id'] in shoping_cart[cid] :
+                                temp=dict()
+                                for i  in shoping_cart[cid] :
+                                    if i == show_kala[cid][data]['id'] :
+                                        temp=shoping_cart[cid][i]
+                                        if 'm' in temp :
+                                            if count_of_size[cid]['m']>0 :
+                                                temp['m'] += count_of_size[cid]['m']
+                                        else :
+                                            if count_of_size[cid]['m']>0 :
+                                                temp.update({'m':count_of_size[cid]['m']}) 
+                                        
+                                        if 'l' in temp :
+                                            if count_of_size[cid]['l']>0 :
+                                                temp['l'] += count_of_size[cid]['l']
+                                        else :
+                                            if count_of_size[cid]['l']>0 :
+                                                temp.update({'l':count_of_size[cid]['l']})
+                                        
+                                        if 'xl' in temp :
+                                            if count_of_size[cid]['xl']>0 :
+                                                temp['xl'] += count_of_size[cid]['xl']
+                                        else :
+                                            if count_of_size[cid]['xl']>0 :
+                                                temp.update({'xl':count_of_size[cid]['xl']})               
+                                        
+                                        if 'xxl' in temp :
+                                            if count_of_size[cid]['xxl']>0 :
+                                                temp['xxl'] += count_of_size[cid]['xxl']
+                                        else :
+                                            if count_of_size[cid]['xxl']>0 :
+                                                temp.update({'xxl':count_of_size[cid]['xxl']})    
+                                        shoping_cart[cid].update({i: temp})
+                                        print(shoping_cart)
+                                    
+                            else :
+                                temp=dict()
+                                kala_id = show_kala[cid][data]['id']
+                                kala_name = show_kala[cid][data]['kalaname']
+                                sale_price = show_kala[cid][data]['sale_price']
+                                image_file_id=show_kala[cid][data]['image_file_id']
+                                temp.update({'kala_name':kala_name})
+                                temp.update({'sale_price':sale_price})
+                                temp.update({'sale_price':sale_price})
+                                temp.update({'image_file_id':image_file_id})
+                                for i in count_of_size[cid] :
+                                    if count_of_size[cid][i] != 0:
+                                        temp.update({i:count_of_size[cid][i]})
+                                shoping_cart[cid].update({kala_id: temp}) 
+                                print(shoping_cart) 
+                        else :
+                            temp=dict()
+                            kala_id = show_kala[cid][data]['id']
+                            kala_name = show_kala[cid][data]['kalaname']
+                            sale_price = show_kala[cid][data]['sale_price']
+                            image_file_id=show_kala[cid][data]['image_file_id']
+                            temp.update({'kala_name':kala_name})
+                            temp.update({'sale_price':sale_price})
+                            temp.update({'sale_price':sale_price})
+                            temp.update({'image_file_id':image_file_id})
+                            for i in count_of_size[cid] :
+                                if count_of_size[cid][i] != 0:
+                                    temp.update({i:count_of_size[cid][i]})
+                            shoping_cart.update({cid:{kala_id:temp}})
+                            print(shoping_cart)  
+                        
+                        bot.delete_message(cid,mid)
+                        if user_step[cid] == 1111 :
+                            user_step[cid] = 1100 
+                        bot.answer_callback_query(call_id,text['add_to_cart'],show_alert=True)         
+                        make_buy_menu_user(cid=cid)
+                            
+                    else :
+                        if user_step[cid]==1110 :
+                            user_step[cid]=1111
+                        bot.answer_callback_query(call_id ,text['no_choice'],show_alert=True )   
+                elif  data.startswith('cancel'):    
+                    bot.delete_message(cid,mid)
+                    if user_step[cid] ==1110 or user_step[cid] ==1111 :
+                        user_step[cid]=1000
+                    bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_s=user_step[cid]))   
+            elif data.startswith('back'):
+                data = data.split('/')[-1]
+                data=int (data)
+                if user_step[cid] == 1100:
+                    user_step[cid] =1000
+                    bot.edit_message_reply_markup(cid, mid, reply_markup=None)
+                    bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_s=user_step[cid]))    
+                if user_step[cid] > 1100 and user_step[cid] <1120 :
+                    user_step[cid]=1100
+                    bot.delete_message(cid,mid)
+                    make_buy_menu_user(cid)
+                    
+        else :
+            bot.edit_message_reply_markup(cid, mid, reply_markup=None)
     else :
         bot.answer_callback_query(call_id, text['no_data'],cache_time=5)  
         bot.edit_message_reply_markup(cid, mid, reply_markup=None)      
@@ -1447,9 +1779,9 @@ def main_command(message) :
     cid=message.chat.id
     if cid in block_user : return
     if user_step[cid] <2000 :
-        bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_step[cid]))
+        bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_s=user_step[cid]))
     elif user_step[cid] >= 2000 and user_step[cid] <3000 :
-        bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_step[cid]))
+        bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_s=user_step[cid]))
     elif user_step[cid] >= 3000 :
         bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_s=user_step[cid]))
 
@@ -1470,11 +1802,12 @@ def button_buy(message) :
     cid=message.chat.id
     if cid in block_user :return
     if user_step[cid] >= 2000 :return
-    markup=ReplyKeyboardMarkup(resize_keyboard=True)
-    markup.add(button['shirt'],button['tshirt'])
-    markup.add(button['home'],button['pants'])
+    # markup=ReplyKeyboardMarkup(resize_keyboard=True)
+    # markup.add(button['shirt'],button['tshirt'])
+    # markup.add(button['home'],button['pants'])
     user_step[cid]=1100
-    bot.send_message(cid,text['select_breakdown'],reply_markup=markup)
+    make_buy_menu_user(cid)
+    bot.send_message(cid,text['goto_home'],reply_markup=make_ReplyKeyboardMarkup(user_s=user_step[cid]))
 
 
 
@@ -2024,3 +2357,4 @@ def message_func(message):
             bot.send_message(cid,text['enter_corect'])
                 
 bot.infinity_polling()
+temp_kala
