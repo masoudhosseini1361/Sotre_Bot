@@ -133,6 +133,23 @@ def update_kala_with_buyinvoice(id , buy_price , count , m_size ,l_size ,xl_size
     conn.commit()
     cursor.close() 
     conn.close()
+    
+
+def update_kala_with_saleinvoice(id , count , size ):
+    conn=mysql.connector.connect(**db_config)
+    cursor=conn.cursor()
+    if size != 'm' :
+        SQL_QURY="""UPDATE kala SET  count= count - %s ,M = M - %s  WHERE id=%s"""
+    elif size != 'l' :
+        SQL_QURY="""UPDATE kala SET  count= count - %s ,L = L - %s  WHERE id=%s"""    
+    elif size != 'xl' :
+        SQL_QURY="""UPDATE kala SET count= count - %s , XL = XL - %s  WHERE id=%s"""    
+    elif size != 'xxl' :
+        SQL_QURY="""UPDATE kala SET count= count - %s , XXL = XXL - %s WHERE id=%s"""            
+    cursor.execute(SQL_QURY,(count ,count,id))
+    conn.commit()
+    cursor.close() 
+    conn.close()    
 
 
 def delete_kala(id):
@@ -157,7 +174,7 @@ def insert_buyinvoice(user_id,fullname,date_invoice):
     cursor.close()
     conn.close()
 
-def insert_rowinvoice(i_number,kala_id,kala_name,kala_price,count,total_row):
+def insert_buy_rowinvoice(i_number,kala_id,kala_name,kala_price,count,total_row):
     conn=mysql.connector.connect(**db_config)
     cursor=conn.cursor()
     SQL_QURY="""INSERT IGNORE INTO buy_row(i_number,kala_id,kala_name,kala_price,count,total_row )
@@ -168,11 +185,34 @@ def insert_rowinvoice(i_number,kala_id,kala_name,kala_price,count,total_row):
     cursor.close()
     conn.close()
 
+# All Function  For sale invoice  Table
+
+def insert_sale_invoice(user_id,fullname,date_invoice):
+    conn=mysql.connector.connect(**db_config)
+    cursor=conn.cursor()
+    SQL_QURY="""INSERT IGNORE INTO sale_invoice(user_id,fullname,date_invoice )
+                VALUE(%s,%s,%s)
+    """
+    cursor.execute(SQL_QURY,(user_id,fullname,date_invoice))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+def insert_sale_rowinvoice(i_number,kala_id,kala_name,kala_price,count,total_row):
+    conn=mysql.connector.connect(**db_config)
+    cursor=conn.cursor()
+    SQL_QURY="""INSERT IGNORE INTO sale_row(i_number,kala_id,kala_name,kala_price,count,total_row )
+                VALUE(%s,%s,%s,%s,%s,%s)
+    """
+    cursor.execute(SQL_QURY,(i_number,kala_id,kala_name,kala_price,count,total_row))
+    conn.commit()
+    cursor.close()
+    conn.close()
 
 
 if __name__ == "__main__":
-    # pass
-    insert_rowinvoice(i_number=2,kala_id=4,kala_name='xcxc',kala_price=216556,count=12,total_row=564165)
+    pass
+    # insert_sale_rowinvoice(i_number=2,kala_id=4,kala_name='xcxc',kala_price=216556,count=12,total_row=564165)
     # update_show_category(name_category='تی شرت',show_category='NO')
     # update_show_category(name_category='تی شرت',show_category='YES')
     # delete_kala(id=8)
