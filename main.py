@@ -364,7 +364,6 @@ def delete_kala_func(cid ,mid=None,id=None,call_id=None):
     markup=InlineKeyboardMarkup()
     if 'id' in kala_cid.keys() :
        result =get_info_buyrow_where_kala_id(kala_id=id)
-       print(len(result))
        if len(result) == 0:
            kala_temp.pop(cid)
            kala.pop(id)
@@ -446,7 +445,6 @@ def make_edit_adminaccount_inline(cid ,mid=None,result=None,cid_user_priv=None ,
     elif user_step[cid] ==3224.1 :
         
         result =search_condition_on_user(cid=cid_user_priv)   
-        print(result)
         result=result[0]
         fullname=result['fullname']
         privilege=result['privilege']
@@ -750,9 +748,7 @@ def make_compelete_purchase_inlinemarkup(cid ,mid =None, id_kala =None ,size =No
                 result =search_on_kala_by_size(id = i, xxl='xxl')
                 if result[0]['xxl'] < temp[i]['xxl'] :
                     temp[i].pop('xxl')
-                    print(temp[i])
-                    shoping_cart[cid].update({i:temp[i]})
-                    print(shoping_cart)                    
+                    shoping_cart[cid].update({i:temp[i]})              
         for i in temp :
             markup=InlineKeyboardMarkup()
             kala_name = temp[i]['kala_name']           
@@ -911,7 +907,7 @@ def call_back_handler(call):
     mid = call.message.message_id
     call_id = call.id
     u_step=user_step[cid]
-    print(f'cid: {cid}, data: {data}, mid: {mid}, id: {call_id},  user step:{u_step}')
+    # print(f'cid: {cid}, data: {data}, mid: {mid}, id: {call_id},  user step:{u_step}')
     if call.message.date < (time.time()-86400) :
         bot.edit_message_reply_markup(cid, mid, reply_markup=None)
     elif data.startswith('group'):
@@ -948,7 +944,6 @@ def call_back_handler(call):
                     bot.edit_message_reply_markup(cid, mid, reply_markup=None)
             elif data.startswith('edit'):              
                 data= data.split('/')[-1]
-               # print(data,'in')
                 if data in category.keys():
                     category_temp.update({cid:[data,mid]})
                     category_oldname.update({cid:data})
@@ -959,7 +954,6 @@ def call_back_handler(call):
                         inline_change_group(cid , mid,condition=data)                                          
                     elif data.startswith('sabt') :   
                         data = data.split('-')[-1]
-                        print(data) 
                         if user_step[cid] ==2110 :
                             user_step[cid] =2100
                         else :
@@ -1524,7 +1518,6 @@ def call_back_handler(call):
                             bot.send_message(cid,text['reapat_kala'])    
                     else :
                         temp1=temp_kala[cid]
-                        print(temp1)
                         temp.update({1 :temp1})
                         buy_invoice_kala.update({cid:temp})
                     temp_kala.pop(cid)        
@@ -1593,7 +1586,6 @@ def call_back_handler(call):
                     bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_step[cid]))                        
             elif data.startswith('back'):
                 data = data.split('/')[-1]
-                print(data)
                 data =int(data)
                 if data ==2310 :
                     user_step[cid] =2300
@@ -1726,7 +1718,6 @@ def call_back_handler(call):
                     elif data.startswith('xxl'):
                         data=data.split('=')[-1]
                         data =int(data)
-                        print(show_kala[cid][data]['XXL'])
                         if show_kala[cid][data]['XXL'] > count_of_size[cid]['xxl'] :
                             count_of_size[cid]['xxl'] +=1  
                             make_buy_menu_user(cid=cid ,mid =mid,number_kala=data)                          
@@ -1767,8 +1758,6 @@ def call_back_handler(call):
                         if 'XXL' in show_kala[cid][data] and show_kala[cid][data]['XXL'] !=0 :
                             temp.update({'xxl':0})
                         count_of_size.update({cid:temp})
-                        print(count_of_size)
-                        
                         bot.delete_message(cid,mid)                     
                         if user_step[cid]==1111 :
                             user_step[cid]=1110   
@@ -1818,7 +1807,6 @@ def call_back_handler(call):
                                             if count_of_size[cid]['xxl']>0 :
                                                 temp.update({'xxl':count_of_size[cid]['xxl']})    
                                         shoping_cart[cid].update({i: temp})
-                                        print(shoping_cart)
                                     
                             else :
                                 temp=dict()
@@ -1834,7 +1822,6 @@ def call_back_handler(call):
                                     if count_of_size[cid][i] != 0:
                                         temp.update({i:count_of_size[cid][i]})
                                 shoping_cart[cid].update({kala_id: temp}) 
-                                print(shoping_cart) 
                         else :
                             temp=dict()
                             kala_id = show_kala[cid][data]['id']
@@ -1848,8 +1835,7 @@ def call_back_handler(call):
                             for i in count_of_size[cid] :
                                 if count_of_size[cid][i] != 0:
                                     temp.update({i:count_of_size[cid][i]})
-                            shoping_cart.update({cid:{kala_id:temp}})
-                            print(shoping_cart)  
+                            shoping_cart.update({cid:{kala_id:temp}}) 
                         
                         bot.delete_message(cid,mid)
                         if user_step[cid] == 1111 :
@@ -1889,8 +1875,6 @@ def call_back_handler(call):
                 size=data.split(',')[-1]
                 size =size.split('=')[-1]
                 id_kala =int(id_kala)
-                print(id_kala)
-                print(size)
                 if user_step[cid] == 1220 :
                     user_step[cid] = 1221
                 make_compelete_purchase_inlinemarkup(cid =cid ,mid =mid, id_kala =id_kala ,size = size)
@@ -2154,7 +2138,7 @@ def buy_invoice_func(message):
 @bot.message_handler(func=lambda message : message.text==button['home'])
 def home_func(message):
     cid=message.chat.id
-    print(f'user step : {user_step[cid]}')
+    # print(f'user step : {user_step[cid]}')
     if cid in block_user :return
     if user_step[cid] <2000 :
         user_step[cid]=1000
@@ -2377,9 +2361,9 @@ def photo_handler(message):
 # ALL MESSAGE INCOMING
 @bot.message_handler(func=lambda message :True)
 def message_func(message):
-    print(message)
+    # print(message)
     cid=message.chat.id
-    print(user_step[cid])
+    # print(user_step[cid])
     if cid in block_user :return
     if user_step[cid]==1251 :
         full_name =message.text

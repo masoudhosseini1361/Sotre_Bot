@@ -212,14 +212,3 @@ def insert_sale_rowinvoice(i_number,kala_id,kala_name,kala_price,count,total_row
 
 if __name__ == "__main__":
     pass
-    # insert_sale_rowinvoice(i_number=2,kala_id=4,kala_name='xcxc',kala_price=216556,count=12,total_row=564165)
-    # update_show_category(name_category='تی شرت',show_category='NO')
-    # update_show_category(name_category='تی شرت',show_category='YES')
-    # delete_kala(id=8)
-    #insert_user(cid=342165313,step=1000 ,username='masoud216')
-    #update_user(cid=87889742,fullname='masoud hosseini',national_code='0075239000',mobile_phone = '09125227989',adress='prozi street')
-    #insert_category(name_category='شلوار',show_category='YES')
-    # update_category(new_name_category='شلور' ,old_name_category='تی شرت' )
-    #delete_category(name_category='شلوار')
-    #insert_kala( kalaname='polo',name_category='تی شرت' ,kala_date='1403/03/27',image_file_id='d:\python\project\image.jpg', buy_price = 0 , sale_price=0 , count=0,m_size=0,l_size=0,xl_size=0,xxl_size=0)
-    # edit_update_kala(id=2,kalaname='BURBERRY',image_file_id='D:\share\13189.jpg',sale_price=850000)

@@ -220,38 +220,3 @@ def last_sale_invoice_id() :
 
 if __name__ == "__main__":
     pass
-    # print(search_on_user(cid=6944720842))
-    # print(search_condition_on_user_by_cid(cid=6944720842))
-    # print(search_on_kala(name_category='تی شرت' ))
-    # print(search_on_kala(kalaname=None ,id=7 ))
-    # print(condition_category( name_category='تی شرت' ))
-    # result =search_condition_on_user(cid=6944720842)
-    # result=result[0]
-    # print(result)
-    # print(search_condition_on_user(cid=6944720842))
-    # print(search_on_user(fullname='حسینی'))
-    # print(search_on_user(mobile_phone='522'))
-    # print(search_on_user(national_code='239'))
-    # # print (get_info_salrow_where_kala_id(kala_id=4))
-    # print(get_infokala_where_category(category='تی شرت'))
-    # print( get_field_kalaname())
-    # resualt= get_info_category()
-    # print(resualt)
-    # if len (resualt) !=0 :
-    #     for i in resualt :
-    #         name_english =i['name_english']
-    #         name_persian =i['name_persian']
-    #         show_category = i['show_category']
-    #         print (name_english,name_persian,show_category ,"\n")
-    # else :
-    #     print("zero")
-    # result=get_info_kala()
-    # print(result)
-    # print(last_kala_id())
-    
-#   print(get_info_user())
-    # result =get_info_user()
-    # for i in result :
-    #     print(i)
-    #     print(i['cid'])
-        
