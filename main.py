@@ -40,6 +40,7 @@ buy_invoice_name=dict()             #id_user={cid:[id,fullname,cid]}
 buy_invoice_kala=dict()            # buy_invoice_temp={cid: dict()}
 temp_kala=dict()                #temp_kala={cid:temp dict}
 shoping_cart=dict()             #shoping_cart={cid:{kalaid1:{size:qty , sale_price:price},kalaid2:{},....},...}
+markup_mid=dict()               #markup-mid={cid={id_kala=mid,....}}
 result = get_info_user()
 for i in result:
     if i['is_block']=='YES' :
@@ -725,7 +726,8 @@ def make_buy_menu_user(cid ,mid =None,number_kala=None):
 
     
 def make_compelete_purchase_inlinemarkup(cid ,mid =None, id_kala =None ,size =None) :
-    temp =dict()    
+    temp =dict()  
+    temp1=dict()  
     if user_step[cid] == 1220 :
         temp=shoping_cart[cid]
         for i in temp :
@@ -770,7 +772,9 @@ def make_compelete_purchase_inlinemarkup(cid ,mid =None, id_kala =None ,size =No
                 count=temp[i]['xxl']
                 markup.add(InlineKeyboardButton(f' XXL : سایز ------تعداد {count} ',callback_data=f'shopingcart-none/none'),
                            InlineKeyboardButton(button['delete_kala'],callback_data=f'shopingcart-delete/code={i},size=xxl')) 
-            bot.send_photo(cid,image_file_id,caption=f'کدکالا : {i}---- نام کالا : {kala_name}---قیمت :{sale_price}',reply_markup=markup)   
+            send_message =bot.send_photo(cid,image_file_id,caption=f'کدکالا : {i}---- نام کالا : {kala_name}---قیمت :{sale_price}',reply_markup=markup)   
+            temp1.update({i:send_message.message_id})
+        markup_mid.update({cid:temp1})
         markup=InlineKeyboardMarkup()
         markup.add(InlineKeyboardButton(button['compelete_purchase'],callback_data=f'shopingcart-sabt'))                         
         markup.add(InlineKeyboardButton(button['cancel'],callback_data=f'shopingcart-cancel'))                                     
@@ -1946,6 +1950,11 @@ def call_back_handler(call):
                     resid_factor +=f'-------------------------------------\nجمع فاکتور شما :{total_invoice}\n'
                     bot.send_message(manager[0],resid_factor)
                     resid_factor +=f'لطفا مبلغ فاکتور را به شماره  6104337960736526 واریز نمایید و رسید واریزی را از قسمت ارسال فیش ارسال نمایید'
+                    temp1=dict()
+                    temp1=markup_mid[cid]
+                    for i in temp1 :
+                        bot.delete_message(cid,temp1[i])
+                    markup_mid.pop(cid)    
                     bot.edit_message_reply_markup(cid,mid,reply_markup=None)
                     bot.send_message(cid,resid_factor)
                     bot.send_message(cid,text['select_switch'],reply_markup=make_ReplyKeyboardMarkup(user_s=user_step[cid]))
