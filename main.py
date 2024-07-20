@@ -888,6 +888,10 @@ def make_ReplyKeyboardMarkup(user_s=None):
             markup.add(button['send_receipt'],button['compelete_purchase'])
             markup.add(button['home'])
             return(markup)
+            # recepit menu
+        elif user_s == 1230 :
+            markup.add(button['home'])
+            return(markup)
             # this user profile menu  for user 
         elif user_s == 1250 :
             markup.add(button['personal_id'],button['full_name'])
@@ -1901,49 +1905,63 @@ def call_back_handler(call):
                 if flag ==1 :
                     total_invoice =0
                     total_count=0
+                    resid_factor =""
+                    number_row =1
                     today=date_today()
-                    result = search_condition_on_user_by_cid(cid =cid)
+                    result = get_info_user(cid =cid)
                     result=result[0]
-                    insert_sale_invoice(user_id=result['id'],fullname=result['fullname'],date_invoice=today)
+                    fullname=result['fullname']
+                    insert_sale_invoice(user_id=result['id'],fullname=fullname,date_invoice=today)
                     invoice_number=last_sale_invoice_id()
+                    resid_factor=f'تاریخ : {today} \n شماره فاکتور  : {invoice_number} \n آقای\خانم : {fullname} \n'
                     for i in temp :
                         kala_name = temp[i]['kala_name']
                         sale_price = temp[i]['sale_price']
                         if 'm' in  temp[i] :
                             count=temp[i]['m']
                             total_row =sale_price * count
-                            k_name=f'{kala_name} سایز M '
+                            k_name=f'کد کالا : {i} --- {kala_name} سایز M '
                             total_invoice += total_row
                             total_count +=count 
+                            resid_factor  += f'{number_row} - {k_name} ----قیمت :{sale_price} \n'
+                            number_row +=1
                             insert_sale_rowinvoice(i_number=invoice_number,kala_id=i,kala_name=k_name,kala_price=sale_price,count=count,total_row=total_row)
                             update_kala_with_saleinvoice(id=i , count =count , size ='m' )
                         if 'l' in  temp[i] :
                             count=temp[i]['l']
                             total_row =sale_price * count
-                            k_name=f'{kala_name} سایز L '
+                            k_name=f'کد کالا : {i} --- {kala_name} سایز L '
                             total_invoice += total_row
                             total_count +=count
+                            resid_factor += f'{number_row} - {k_name} ----قیمت :{sale_price} \n'
+                            number_row +=1
                             insert_sale_rowinvoice(i_number=invoice_number,kala_id=i,kala_name=k_name,kala_price=sale_price,count=count,total_row=total_row)
                             update_kala_with_saleinvoice(id=i , count =count , size ='l' )
                         if 'xl' in  temp[i] :
                             count=temp[i]['xl']
                             total_row =sale_price * count
-                            k_name=f'{kala_name} سایز XL '
+                            k_name=f'کد کالا : {i} --- {kala_name} سایز XL '
                             total_invoice += total_row
                             total_count +=count
+                            resid_factor += f'{number_row} - {k_name} ----قیمت :{sale_price} \n'
+                            number_row +=1
                             insert_sale_rowinvoice(i_number=invoice_number,kala_id=i,kala_name=k_name,kala_price=sale_price,count=count,total_row=total_row)
                             update_kala_with_saleinvoice(id=i , count =count , size ='xl' )
                         if 'xxl' in  temp[i] :
                             count=temp[i]['xxl']
                             total_row =sale_price * count
-                            k_name=f'{kala_name} سایز XXL '
+                            k_name=f'کد کالا : {i} --- {kala_name} سایز XXL '
                             total_invoice += total_row
                             total_count +=count
+                            resid_factor += f'{number_row} - {k_name} ----قیمت :{sale_price} \n'
+                            number_row +=1
                             insert_sale_rowinvoice(i_number=invoice_number,kala_id=i,kala_name=k_name,kala_price=sale_price,count=count,total_row=total_row)
                             update_kala_with_saleinvoice(id=i , count =count , size = 'xxl')
                     shoping_cart.pop(cid)
                     user_step[cid] = 1000
-                    resid_factor =f'قاکتور شما با شماره  {invoice_number} و تعداد کل {total_count} و مبلغ {total_invoice} ثبت شد لطفا مبلغ فاکتور را به شماره  6104337960736526 واریز نمایید و رسید واریزی را از قسمت ارسال فیش ارسال نمایید.'
+                    resid_factor +=f'-------------------------------------\nجمع فاکتور شما :{total_invoice}\n'
+                    bot.send_message(manager[0],resid_factor)
+                    resid_factor +=f'لطفا مبلغ فاکتور را به شماره  6104337960736526 واریز نمایید و رسید واریزی را از قسمت ارسال فیش ارسال نمایید'
                     bot.edit_message_reply_markup(cid,mid,reply_markup=None)
                     bot.send_message(cid,resid_factor)
                     bot.send_message(cid,text['select_switch'],reply_markup=make_ReplyKeyboardMarkup(user_s=user_step[cid]))
@@ -2190,6 +2208,15 @@ def user_compelete_purchase_func(message) :
         bot.send_message(cid,text['no_kala_in_cart'])
 
 
+@bot.message_handler(func=lambda message : message.text==button['send_receipt'])
+def user_send_receipt_func(message) :
+    cid=message.chat.id
+    if cid in block_user :return
+    if user_step[cid] >= 2000 :return
+    if user_step[cid ] ==1210 :
+        user_step[cid] =1230
+    bot.send_message(cid,text['receipt_photo'],reply_markup=make_ReplyKeyboardMarkup(user_s=user_step[cid])) 
+   
 
 
 
@@ -2324,19 +2351,26 @@ def photo_handler(message):
     if cid in block_user: return
     if user_step[cid] == 2121 or user_step[cid] == 3121:
         file_id = message.photo[-1].file_id
-        print (file_id)
         kala_cid=kala_temp[cid]
         kala_cid.update({'image_file_id' :file_id})
         kala_temp.update({cid : kala_cid})
         insert_kala_func(cid)
     elif user_step[cid] == 2122 or user_step[cid] == 3122:
         file_id = message.photo[-1].file_id
-        print (file_id)
         kala_cid=kala_temp[cid]
         kala_cid.update({'image_file_id' :file_id})
         kala_temp.update({cid : kala_cid})
         edit_kala_func(cid)
-        
+    elif user_step[cid] ==1230 :
+        file_id = message.photo[-1].file_id
+        result =get_info_user(cid=cid)
+        result=result[0]
+        fullname=result["fullname"]
+        resid=f'این فیش را مشتری بنام {fullname}  فرستاده است لطفا چک بفرمایید ' 
+        bot.send_photo(manager,file_id,caption=resid)
+        if user_step[cid ] ==1230 :
+            user_step[cid] =1000
+        bot.send_message(cid,text['select_menu'],reply_markup=make_ReplyKeyboardMarkup(user_step[cid]))
 
 
 

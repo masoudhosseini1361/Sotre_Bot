@@ -138,13 +138,13 @@ def update_kala_with_buyinvoice(id , buy_price , count , m_size ,l_size ,xl_size
 def update_kala_with_saleinvoice(id , count , size ):
     conn=mysql.connector.connect(**db_config)
     cursor=conn.cursor()
-    if size != 'm' :
+    if size == 'm' :
         SQL_QURY="""UPDATE kala SET  count= count - %s ,M = M - %s  WHERE id=%s"""
-    elif size != 'l' :
+    elif size == 'l' :
         SQL_QURY="""UPDATE kala SET  count= count - %s ,L = L - %s  WHERE id=%s"""    
-    elif size != 'xl' :
+    elif size == 'xl' :
         SQL_QURY="""UPDATE kala SET count= count - %s , XL = XL - %s  WHERE id=%s"""    
-    elif size != 'xxl' :
+    elif size == 'xxl' :
         SQL_QURY="""UPDATE kala SET count= count - %s , XXL = XXL - %s WHERE id=%s"""            
     cursor.execute(SQL_QURY,(count ,count,id))
     conn.commit()

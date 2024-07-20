@@ -4,11 +4,15 @@ from Config import *
 #All Function for user table
 
 
-def get_info_user() :
+def get_info_user(cid=None) :
     conn=mysql.connector.connect(**db_config)
     cursor=conn.cursor(dictionary=True)
-    SQL_QURY="""SELECT * FROM user"""
-    cursor.execute(SQL_QURY)
+    if cid ==None :
+        SQL_QURY="""SELECT * FROM user"""
+        cursor.execute(SQL_QURY)
+    else :
+        SQL_QURY="""SELECT * FROM user WHERE cid = %s """
+        cursor.execute(SQL_QURY,(cid,))    
     result=cursor.fetchall()
     cursor.close()
     conn.close()
@@ -48,16 +52,6 @@ def search_condition_on_user(cid) :
     cursor.close()
     conn.close()
     return result        
-
-def search_condition_on_user_by_cid(cid) :
-    conn=mysql.connector.connect(**db_config)
-    cursor=conn.cursor(dictionary=True)
-    SQL_QURY="""SELECT id,fullname FROM user WHERE cid = %s """
-    cursor.execute(SQL_QURY,(cid,))
-    result=cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return result 
 
 
 
